@@ -18,6 +18,9 @@
     "setup:local:ingest:run:json": "npm run ingest:run:json",
     "setup:local:ingest:run:fetch-again": "npm run ingest:run:fetch-again",
     "setup:local:workflow:run": "npm run workflow:run",
+    "setup:local:api:start": "npm run start:api",
+    "setup:local:ui:start": "npm run start:ui",
+    "setup:local:api-ui:start": "npm run start:api-ui",
     "venv:setup": "bash ./scripts/local-env.sh setup",
     "venv:activate": "bash ./scripts/local-env.sh activate",
     "venv:deactivate": "bash ./scripts/local-env.sh deactivate",
@@ -29,7 +32,13 @@
     "ingest:run": "uv run --active python -m app.main",
     "ingest:run:json": "uv run --active python -m app.main --json",
     "ingest:run:fetch-again": "uv run --active python -m app.main --fetch-again --json",
-    "workflow:run": "uv run --active python -m app.main --workflow ingest"
+    "workflow:run": "uv run --active python -m app.main --workflow ingest",
+    "start:api": "bash ./scripts/start-api.sh",
+    "start:ui": "bash ./scripts/start-ui.sh",
+    "start:api-ui": "bash ./scripts/start-api-ui.sh",
+    "start:api:ps": "powershell -ExecutionPolicy Bypass -File ./scripts/start-api.ps1",
+    "start:ui:ps": "powershell -ExecutionPolicy Bypass -File ./scripts/start-ui.ps1",
+    "start:api-ui:ps": "powershell -ExecutionPolicy Bypass -File ./scripts/start-api-ui.ps1"
   }
 }
 

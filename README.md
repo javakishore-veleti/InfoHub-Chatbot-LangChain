@@ -111,6 +111,70 @@ Supported flags:
 - `--json`
 - `--fetch-again`
 
+## Portal + API (new)
+
+The project now includes:
+
+- Angular portal UI in `Portals/infohub-app`
+- FastAPI backend in `app/Api`
+
+Portal domains in top menu:
+
+- Home (chat placeholder)
+- Ingest
+- Model Build (placeholder)
+- Administration (placeholder)
+
+Ingest domain left nav:
+
+- Workflow Catalog
+- Run Workflow
+- Execution History
+
+Dynamic run form behavior:
+
+- UI fields are driven from workflow metadata in `app/config.json` (`ui.fields`)
+- The run page renders inputs and validations dynamically from that metadata
+
+Execution persistence:
+
+- SQLite database path: `~/Runtime_Data/AI_Projects/InfoHub-Chatblot/sqlite/infohub.db`
+- Table: `workflow_execution`
+- Supports filters + pagination (`page_size` default 15)
+
+Key API endpoints:
+
+- `GET /api/v1/health`
+- `GET /api/v1/workflows`
+- `GET /api/v1/workflows/{workflow_selector}`
+- `POST /api/v1/ingest/runs/{workflow_selector}`
+- `GET /api/v1/executions`
+- `GET /api/v1/executions/{execution_id}`
+
+Placeholder future modules:
+
+- `GET /api/v1/chat/health`
+- `GET /api/v1/model-build/health`
+- `GET /api/v1/administration/health`
+
+Run API and UI together:
+
+```bash
+npm run start:api-ui
+```
+
+Run API only:
+
+```bash
+npm run start:api
+```
+
+Run UI only:
+
+```bash
+npm run start:ui
+```
+
 Config format is modularized by workflows:
 
 ```json
