@@ -60,6 +60,8 @@ def _load_config(config_path: str) -> dict:
 
 
 def _load_data_engineering_status(status_file: Path) -> dict:
+    # Runtime status lives in the user's home folder, not inside the repo.
+    # Example record key after this refactor: "ingest_001" for AWSBedrock.
     status_file.parent.mkdir(parents=True, exist_ok=True)
     if status_file.exists():
         try:
@@ -91,14 +93,20 @@ def _save_data_engineering_status(status_file: Path, payload: dict) -> None:
 
 
 def _resolve_workflow_config(config: dict, workflow_name: str | None) -> tuple[str, str, str, str, dict]:
+    # Config now supports parent/child workflow selection.
+    # Example default resolution: no CLI workflow -> parent="ingest", child="AWSBedrock".
     workflows = config.get("workflows")
     if not isinstance(workflows, dict) or not workflows:
         raise ValueError("Config must include a non-empty 'workflows' object")
 
+    # Example from config.json:
+    # "default_workflow": {"parent": "ingest", "child": "AWSBedrock"}
     default_workflow = config.get("default_workflow") or {}
     default_parent = default_workflow.get("parent") or "ingest"
 
     def resolve_parent_default_child(parent_name: str) -> tuple[str, str, dict]:
+        # If user says only "ingest", resolve to ingest's configured default child.
+        # For our AWS Bedrock setup that means "ingest/AWSBedrock".
         parent_config = workflows.get(parent_name)
         if not isinstance(parent_config, dict):
             raise ValueError(f"Workflow parent '{parent_name}' was not found under 'workflows'")
@@ -118,6 +126,7 @@ def _resolve_workflow_config(config: dict, workflow_name: str | None) -> tuple[s
         return parent_name, default_child, child_config
 
     if not workflow_name:
+        # No CLI workflow provided -> use config default child.
         default_child = default_workflow.get("child")
         if default_child:
             parent_config = workflows.get(default_parent)
@@ -138,6 +147,7 @@ def _resolve_workflow_config(config: dict, workflow_name: str | None) -> tuple[s
         return parent_name, child_name, f"{parent_name}/{child_name}", workflow_id, child_config
 
     if "/" in workflow_name:
+        # Explicit form, e.g. "ingest/AWSBedrock".
         parent_name, child_name = workflow_name.split("/", 1)
         parent_config = workflows.get(parent_name)
         if not isinstance(parent_config, dict):
@@ -152,6 +162,7 @@ def _resolve_workflow_config(config: dict, workflow_name: str | None) -> tuple[s
         return parent_name, child_name, f"{parent_name}/{child_name}", workflow_id, child_config
 
     if workflow_name in workflows:
+        # Parent-only form, e.g. "ingest" -> expand to its default child.
         parent_name, child_name, child_config = resolve_parent_default_child(workflow_name)
         workflow_id = child_config.get("workflow_id")
         if not isinstance(workflow_id, str) or not workflow_id.strip():
@@ -159,6 +170,7 @@ def _resolve_workflow_config(config: dict, workflow_name: str | None) -> tuple[s
         return parent_name, child_name, f"{parent_name}/{child_name}", workflow_id, child_config
 
     matches: list[tuple[str, str, dict]] = []
+    # Child-only form, e.g. "AWSBedrock" -> search across parents.
     for parent_name, parent_config in workflows.items():
         if not isinstance(parent_config, dict):
             continue
@@ -183,6 +195,8 @@ def _resolve_workflow_config(config: dict, workflow_name: str | None) -> tuple[s
 
 
 def _validate_ingest_config(parser: argparse.ArgumentParser, workflow_config: dict) -> None:
+    # These are the minimum fields needed by the reusable HTML ingest pipeline.
+    # AWSBedrock currently supplies all of them under workflows.ingest.children.AWSBedrock.
     required_keys = ["workflow_id", "seed_url", "max_tokens", "max_pages", "max_depth", "timeout_seconds"]
     for key in required_keys:
         if key not in workflow_config:
@@ -210,6 +224,8 @@ def _validate_ingest_config(parser: argparse.ArgumentParser, workflow_config: di
     if query_terms is not None and not isinstance(query_terms, list):
         parser.error("query_terms must be a list when provided")
 
+    # workflow_id is the runtime-safe identifier used in the user's home folder.
+    # Example: human selector "ingest/AWSBedrock" maps to workflow_id "ingest_001".
     workflow_id = workflow_config.get("workflow_id")
     if not isinstance(workflow_id, str) or not workflow_id.strip():
         parser.error("workflow_id must be a non-empty string")
@@ -245,14 +261,19 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
+        # Step 1: load config and normalize whatever the user typed into a canonical selector.
+        # Example outputs here: workflow_key="ingest/AWSBedrock", workflow_id="ingest_001".
         config = _load_config(args.config)
         workflow_parent, workflow_child, workflow_key, workflow_id, workflow_config = _resolve_workflow_config(config, args.workflow)
     except ValueError as err:
         parser.error(str(err))
 
+    # Step 2: validate the resolved child workflow config before any crawl begins.
     _validate_ingest_config(parser, workflow_config)
 
     req_dto = IngestReqDto()
+    # Request DTO carries the runtime knobs that tasks actually consume.
+    # Example AWSBedrock values: docs.aws.amazon.com + /bedrock/latest/userguide/.
     req_dto.add_ctx_data("seed_url", workflow_config["seed_url"])
     req_dto.add_ctx_data("max_tokens", int(workflow_config["max_tokens"]))
     req_dto.add_ctx_data("max_pages", int(workflow_config["max_pages"]))
@@ -267,8 +288,12 @@ def main() -> int:
 
     resp_dto = IngestRespDto()
 
+    # Runtime artifacts are written under the stable workflow_id, not the display name.
+    # Example path root: .../Runtime_Data/.../ingest/ingest_001/
     ingest_storage_root = DEFAULT_INGEST_STORAGE_BASE / workflow_id
 
+    # ExecCtxData is the shared cross-task state bag.
+    # It carries workflow identity, status JSON, storage paths, and registry info.
     data_engg_status_json = _load_data_engineering_status(DEFAULT_STATUS_FILE)
     exec_ctx_data = ExecCtxData()
     exec_ctx_data.add_ctx_data("workflow_name", workflow_key)
@@ -283,10 +308,15 @@ def main() -> int:
     exec_ctx_data.add_ctx_data("data_engg_status_file_path", str(DEFAULT_STATUS_FILE))
     exec_ctx_data.add_ctx_data("ingest_storage_root", str(ingest_storage_root))
 
+    # Step 3: run the facade. For AWSBedrock this resolves the task list from workflow_tasks.json,
+    # then runs crawl first and chunking second.
     facade = IngestWfFacade()
     return_code = facade.execute(req_dto, resp_dto, exec_ctx_data)
+
+    # Persist updated status back to the user's home folder after execution.
     _save_data_engineering_status(DEFAULT_STATUS_FILE, exec_ctx_data.get_ctx_data_by_key("data_engg_status_json") or {})
 
+    # Summaries below are for CLI readability only; the full data is already written to runtime JSON files.
     extracted_html_chunks = resp_dto.get_ctx_data_by_key("extracted_html_chunks") or {}
     chunk_results_by_method = resp_dto.get_ctx_data_by_key("chunk_results_by_method") or {}
     methods_summary = _summarize_methods(chunk_results_by_method)

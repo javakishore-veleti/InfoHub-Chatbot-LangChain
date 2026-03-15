@@ -33,6 +33,7 @@ class ChunkHtmlTextTask(WfTask):
 
     @staticmethod
     def _strategy_registry() -> dict[str, BaseChunkingStrategyTask]:
+        # Each key is the canonical strategy name used in config and JSON output.
         return {
             "fixed_token": FixedTokenChunkingTask(),
             "sliding_window_overlap": SlidingWindowOverlapChunkingTask(),
@@ -45,6 +46,8 @@ class ChunkHtmlTextTask(WfTask):
 
     @staticmethod
     def _aliases() -> dict[str, str]:
+        # Backward-compatible config names still accepted from older configs.
+        # Example: "fixed_token_overlap" is normalized to "sliding_window_overlap".
         return {
             "fixed_token_overlap": "sliding_window_overlap",
             "paragraph": "paragraph_section",
@@ -54,10 +57,12 @@ class ChunkHtmlTextTask(WfTask):
         """Resolve configured methods and normalize backward-compatible aliases."""
         strategy_registry = self._strategy_registry()
         aliases = self._aliases()
+        # If config omits chunking_methods, run every registered strategy.
         requested_methods = reqDto.get_ctx_data_by_key("chunking_methods") or list(strategy_registry.keys())
         resolved_methods: list[str] = []
         for method in requested_methods:
             canonical = aliases.get(method, method)
+            # Keep the final list unique and canonical so storage folders stay predictable.
             if canonical in strategy_registry and canonical not in resolved_methods:
                 resolved_methods.append(canonical)
         return resolved_methods
@@ -77,6 +82,8 @@ class ChunkHtmlTextTask(WfTask):
             respDto.set_status("failed")
             return WfReturnCodes.FAILED
 
+        # Example AWSBedrock input here:
+        # {"https://docs.aws.amazon.com/.../what-is-bedrock.html": "<clean text>", ...}
         methods = self._resolve_methods(reqDto)
         if not methods:
             respDto.set_status("failed")
@@ -86,6 +93,8 @@ class ChunkHtmlTextTask(WfTask):
         chunk_results_by_method: dict[str, dict[str, list[str]]] = {}
 
         try:
+            # Fan out the same crawled page text to all selected strategies in parallel.
+            # We do this only after crawl, so AWSBedrock pages are fetched once, not once per strategy.
             with ThreadPoolExecutor(max_workers=min(8, len(methods))) as executor:
                 futures = {
                     method: executor.submit(
@@ -98,8 +107,11 @@ class ChunkHtmlTextTask(WfTask):
                     for method in methods
                 }
                 for method, future in futures.items():
+                    # Each result is shaped like {url: [chunk1, chunk2, ...]} for one strategy.
                     chunk_results_by_method[method] = future.result()
 
+            # Persist each strategy under the current run folder for this workflow_id.
+            # Example path: .../ingest/ingest_001/YYYY.../chunk_results/semantic/
             storage_root = execCtxData.get_ctx_data_by_key("ingest_storage_root")
             storage = IngestStorageManager(Path(storage_root))
             storage.write_chunk_results(Path(run_folder_str), chunk_results_by_method)
@@ -107,6 +119,8 @@ class ChunkHtmlTextTask(WfTask):
             respDto.set_status("failed")
             return WfReturnCodes.FAILED
 
+        # Keep one backward-compatible "primary" result map for simple summaries/older code.
+        # Current preference is fixed_token when available.
         primary_method = "fixed_token" if "fixed_token" in chunk_results_by_method else methods[0]
         respDto.add_ctx_data("chunking_methods_executed", methods)
         respDto.add_ctx_data("chunk_results_by_method", chunk_results_by_method)
@@ -121,6 +135,8 @@ class ChunkHtmlTextTask(WfTask):
         execCtxData: ExecCtxData,
     ) -> dict[str, list[str]]:
         """Build one method result map `{url: [chunks...]}` for all crawled pages."""
+        # Example output for paragraph_section on AWSBedrock docs:
+        # one URL may become chunks like ["intro paragraph...", "Step 1...", "Step 2..."]
         return {
             url: strategy_task.build_chunks(text, reqDto, execCtxData)
             for url, text in pages_text_by_url.items()
