@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"class.*Task\" /c/Users/javak/PycharmProjects/InfoHub-Chatbot-LangChain/app/workflows/data_load/tasks/chunking/*.py | head -10)",
+      "Bash(wc -l /c/Users/javak/PycharmProjects/InfoHub-Chatbot-LangChain/app/**/*.py 2>/dev/null | tail -1)",
+      "Bash(cd \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\Portals\\\\infohub-app\" && rm -f src/app/pages/home-page.component.ts src/app/pages/model-build-page.component.ts src/app/pages/administration-page.component.ts src/app/pages/ingest-workflows-page.component.ts src/app/pages/ingest-run-page.component.ts src/app/pages/ingest-executions-page.component.ts src/app/app.html src/app/app.css src/app/app.spec.ts)",
+      "Bash(cd \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\Portals\\\\infohub-app\" && npx ng build 2>&1 | head -80)",
+      "Bash(cd \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\Portals\\\\infohub-app\" && npx ng build 2>&1 | tail -20)",
+      "Bash(cd \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\Portals\\\\infohub-app\" && npx ng build 2>&1 | tail -10)",
+      "Bash(netstat -ano | grep :4200 | head -5)",
+      "Bash(taskkill //PID 17048 //F)"
+    ]
+  }
+}
