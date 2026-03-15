@@ -1,6 +1,6 @@
 {
   "workflows": {
-    "ingest": {
+    "ingest_001": {
       "completed": false,
       "last_started_at": null,
       "last_completed_at": null,

@@ -27,6 +27,8 @@ class CrawlConfig:
     timeout_seconds: int = 20
     chunking_methods: list[str] | None = None
     query_terms: list[str] | None = None
+    allowed_domains: list[str] | None = None
+    allowed_path_prefixes: list[str] | None = None
 
 
 class BedrockDocsCrawler:
@@ -90,14 +92,23 @@ class BedrockDocsCrawler:
     def _normalize_url(url: str) -> str:
         return url.split("#", 1)[0]
 
-    @staticmethod
-    def _is_allowed_doc_url(url: str) -> bool:
+    def _is_allowed_doc_url(self, url: str) -> bool:
         parsed = urlparse(url)
         if parsed.scheme not in {"http", "https"}:
             return False
-        if parsed.netloc != "docs.aws.amazon.com":
+
+        allowed_domains = self.config.allowed_domains or [urlparse(self.config.start_url).netloc]
+        if parsed.netloc not in allowed_domains:
             return False
-        return parsed.path.startswith("/bedrock/latest/userguide/")
+
+        allowed_prefixes = self.config.allowed_path_prefixes or [self._default_path_prefix()]
+        return any(parsed.path.startswith(prefix) for prefix in allowed_prefixes)
+
+    def _default_path_prefix(self) -> str:
+        start_path = urlparse(self.config.start_url).path
+        if start_path.endswith("/"):
+            return start_path
+        return start_path.rsplit("/", 1)[0] + "/"
 
 
 # noinspection PyPep8Naming
@@ -116,6 +127,8 @@ class CrawlHtmlFilesTask(WfTask):
             timeout_seconds=reqDto.get_ctx_data_by_key("timeout_seconds") or CrawlConfig.timeout_seconds,
             chunking_methods=reqDto.get_ctx_data_by_key("chunking_methods") or None,
             query_terms=reqDto.get_ctx_data_by_key("query_terms") or None,
+            allowed_domains=reqDto.get_ctx_data_by_key("allowed_domains") or None,
+            allowed_path_prefixes=reqDto.get_ctx_data_by_key("allowed_path_prefixes") or None,
         )
 
         storage_root = execCtxData.get_ctx_data_by_key("ingest_storage_root")

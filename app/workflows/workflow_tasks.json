@@ -1,0 +1,15 @@
+{
+  "ingest": {
+    "default": [
+      "app.workflows.data_load.tasks.extract_html_files:CrawlHtmlFilesTask",
+      "app.workflows.data_load.tasks.chunking.parallel_chunking_task:ChunkHtmlTextTask"
+    ],
+    "children": {
+      "AWSBedrock": [
+        "app.workflows.data_load.tasks.extract_html_files:CrawlHtmlFilesTask",
+        "app.workflows.data_load.tasks.chunking.parallel_chunking_task:ChunkHtmlTextTask"
+      ]
+    }
+  }
+}
+

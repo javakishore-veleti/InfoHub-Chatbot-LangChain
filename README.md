@@ -67,6 +67,9 @@ npm run setup:local:deps:check
 
 The CLI now reads workflow settings from `app/config.json`, so you do not need to pass crawl arguments each run.
 
+Workflow task order is externalized in `app/workflows/workflow_tasks.json`.
+Each parent workflow can define a default task list and optional child-specific overrides in `module.path:ClassName` format.
+
 Run with the default workflow from config:
 
 ```bash
@@ -89,7 +92,11 @@ Run a specific workflow entry from config:
 
 ```bash
 uv run --active python -m app.main --workflow ingest
+uv run --active python -m app.main --workflow AWSBedrock
+uv run --active python -m app.main --workflow ingest/AWSBedrock
 ```
+
+`AWSBedrock` is the default child under the `ingest` parent workflow.
 
 Use a different config file:
 
@@ -108,31 +115,47 @@ Config format is modularized by workflows:
 
 ```json
 {
-  "default_workflow": "ingest",
+  "default_workflow": {
+    "parent": "ingest",
+    "child": "AWSBedrock"
+  },
   "workflows": {
 	"ingest": {
-	  "seed_url": "https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html",
-	  "max_tokens": 400,
-	  "overlap_tokens": 40,
-	  "max_pages": 30,
-	  "max_depth": 2,
-	  "timeout_seconds": 20,
-	  "chunking_methods": [
-		"fixed_token",
-		"sliding_window_overlap",
-		"sentence",
-		"paragraph_section",
-		"semantic",
-		"hierarchical",
-		"query_aware"
-	  ],
-	  "query_terms": ["knowledge base", "foundation model", "guardrails"]
+	  "default_child": "AWSBedrock",
+	  "children": {
+		"AWSBedrock": {
+		  "workflow_id": "ingest_001",
+		  "seed_url": "https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html",
+		  "allowed_domains": ["docs.aws.amazon.com"],
+		  "allowed_path_prefixes": ["/bedrock/latest/userguide/"],
+		  "max_tokens": 400,
+		  "overlap_tokens": 40,
+		  "max_pages": 30,
+		  "max_depth": 2,
+		  "timeout_seconds": 20,
+		  "chunking_methods": [
+			"fixed_token",
+			"sliding_window_overlap",
+			"sentence",
+			"paragraph_section",
+			"semantic",
+			"hierarchical",
+			"query_aware"
+		  ],
+		  "query_terms": ["knowledge base", "foundation model", "guardrails"]
+		}
+	  }
 	}
   }
 }
 ```
 
-`ingest` now runs as a task list: crawl once, then apply all configured chunking methods in parallel on the already-crawled text.
+If no workflow is provided, the default is `ingest/AWSBedrock`.
+
+Each child workflow must define a stable `workflow_id`. Example: `ingest_001`.
+The selector name is for humans; the ID is for runtime storage and status tracking.
+
+`ingest` is now a parent workflow: crawl once, then apply all configured chunking methods in parallel on the already-crawled text.
 
 Task responsibilities:
 
@@ -143,16 +166,37 @@ Task responsibilities:
 
 Detailed strategy/task documentation: `README_INGEST_CHUNKING.md`.
 
+Task registry example:
+
+```json
+{
+  "ingest": {
+	"default": [
+	  "app.workflows.data_load.tasks.extract_html_files:CrawlHtmlFilesTask",
+	  "app.workflows.data_load.tasks.chunking.parallel_chunking_task:ChunkHtmlTextTask"
+	],
+	"children": {
+	  "AWSBedrock": [
+		"app.workflows.data_load.tasks.extract_html_files:CrawlHtmlFilesTask",
+		"app.workflows.data_load.tasks.chunking.parallel_chunking_task:ChunkHtmlTextTask"
+	  ]
+	}
+  }
+}
+```
+
 Runtime output is stored under:
 
-- `~/Runtime_Data/AI_Projects/InfoHub-Chatblot/ingest/AWSBedrock/YYYY-MM-DD-HH-MM/...`
-- `latest_data.json` in `AWSBedrock` points to the latest timestamp folder.
+- `~/Runtime_Data/AI_Projects/InfoHub-Chatblot/ingest/ingest_001/YYYY-MM-DD-HH-MM/...`
+- `latest_data.json` in `ingest_001` points to the latest timestamp folder.
 - Without `--fetch-again`, the latest folder is reused when available.
 - With `--fetch-again`, a new timestamp folder is created and `latest_data.json` is updated.
 
 Workflow completion state is tracked in:
 
 - `~/Runtime_Data/AI_Projects/InfoHub-Chatblot/Data_Engineering_Status.json`
+
+That status file uses `workflow_id` keys such as `ingest_001`.
 
 This generated status file is gitignored. Template file: `app/data_engineering_status.template.json`.
 
