@@ -19,6 +19,19 @@
 - How we decide it is readable: if a page returns normal language text after cleanup (not just scripts, styling, or empty structure), it is used for chunking; otherwise it is skipped.
 - Splits text into token-sized chunks.
 
+## One simple example
+
+Sample content:
+
+> In this section, we will show you how to get started with Amazon Bedrock within a few minutes... Step 1 - AWS Account... Step 2 - API key... Step 3 - Get the SDK...
+
+How to read that sample:
+
+- intro = general getting-started explanation
+- step 1 = AWS account setup
+- step 2 = API key creation
+- step 3 = SDK install
+
 ## How chunking is done here
 
 - Text is split word-by-word.
@@ -53,13 +66,13 @@
 
 ## Strategy tasks implemented
 
-- `fixed_token`: baseline fixed token windows.
-- `sliding_window_overlap`: token windows with overlap to preserve boundary continuity.
-- `sentence`: sentence-first grouping, then merge by token limit.
-- `paragraph_section`: paragraph/section-first grouping, then merge by token limit.
-- `semantic`: topic-shift aware splitting using sentence-term similarity heuristics.
-- `hierarchical`: parent chunks first, then child chunks for finer retrieval.
-- `query_aware`: prioritizes lines related to configured query terms plus neighbors.
+- `fixed_token`: may cut in the middle of Step 2 or Step 3 because it follows token size only.
+- `sliding_window_overlap`: repeats some ending text, so if Step 2 sits near a boundary it appears in both chunks.
+- `sentence`: tries to keep each sentence whole, so the Step 2 explanation stays more natural.
+- `paragraph_section`: most likely to keep intro, Step 1, Step 2, and Step 3 as separate blocks.
+- `semantic`: tends to split when topic changes, so intro, account setup, API key, and SDK can become separate chunks.
+- `hierarchical`: first builds larger groups like intro + Step 1, then creates smaller child chunks from them.
+- `query_aware`: if the query is about API keys or SDKs, Step 2 and Step 3 are prioritized over Step 1.
 
 Aliases accepted in config:
 

@@ -19,10 +19,21 @@ from app.workflows.data_load.tasks.storage_manager import IngestStorageManager
 
 
 class ChunkHtmlTextTask(WfTask):
+    """Coordinator task that runs selected chunking strategy tasks in parallel.
+
+    Example meaning with the sample Bedrock onboarding text:
+    the same content containing the intro, Step 1, Step 2, and Step 3 is passed
+    to every strategy once crawl text is ready. Each strategy then produces a
+    different chunk view of that same content.
+    """
+
     def __init__(self):
         super().__init__()
         self.task_name = "CHUNK_HTML_TEXT_TASK"
-        self._strategy_registry: dict[str, BaseChunkingStrategyTask] = {
+
+    @staticmethod
+    def _strategy_registry() -> dict[str, BaseChunkingStrategyTask]:
+        return {
             "fixed_token": FixedTokenChunkingTask(),
             "sliding_window_overlap": SlidingWindowOverlapChunkingTask(),
             "sentence": SentenceChunkingTask(),
@@ -31,21 +42,35 @@ class ChunkHtmlTextTask(WfTask):
             "hierarchical": HierarchicalChunkingTask(),
             "query_aware": QueryAwareChunkingTask(),
         }
-        self._aliases = {
+
+    @staticmethod
+    def _aliases() -> dict[str, str]:
+        return {
             "fixed_token_overlap": "sliding_window_overlap",
             "paragraph": "paragraph_section",
         }
 
     def _resolve_methods(self, reqDto: IngestReqDto) -> list[str]:
-        requested_methods = reqDto.get_ctx_data_by_key("chunking_methods") or list(self._strategy_registry.keys())
+        """Resolve configured methods and normalize backward-compatible aliases."""
+        strategy_registry = self._strategy_registry()
+        aliases = self._aliases()
+        requested_methods = reqDto.get_ctx_data_by_key("chunking_methods") or list(strategy_registry.keys())
         resolved_methods: list[str] = []
         for method in requested_methods:
-            canonical = self._aliases.get(method, method)
-            if canonical in self._strategy_registry and canonical not in resolved_methods:
+            canonical = aliases.get(method, method)
+            if canonical in strategy_registry and canonical not in resolved_methods:
                 resolved_methods.append(canonical)
         return resolved_methods
 
     def execute(self, reqDto: IngestReqDto, respDto: IngestRespDto, execCtxData: ExecCtxData) -> int:
+        """Execute strategy tasks over crawled text, persist outputs, and publish aggregate keys.
+
+        Using the sample Bedrock text as an example:
+        - fixed token may split inside Step 2 if the token budget ends there
+        - paragraph strategy may keep each step block together
+        - query-aware may emphasize Step 2/Step 3 if the query is about API keys or SDKs
+        This method coordinates all of those runs on the same input text.
+        """
         pages_text_by_url = respDto.get_ctx_data_by_key("crawled_page_text_by_url") or {}
         run_folder_str = respDto.get_ctx_data_by_key("active_run_folder")
         if not pages_text_by_url or not run_folder_str:
@@ -57,6 +82,7 @@ class ChunkHtmlTextTask(WfTask):
             respDto.set_status("failed")
             return WfReturnCodes.FAILED
 
+        strategy_registry = self._strategy_registry()
         chunk_results_by_method: dict[str, dict[str, list[str]]] = {}
 
         try:
@@ -64,9 +90,10 @@ class ChunkHtmlTextTask(WfTask):
                 futures = {
                     method: executor.submit(
                         self._build_method_chunks,
-                        self._strategy_registry[method],
+                        strategy_registry[method],
                         pages_text_by_url,
                         reqDto,
+                        execCtxData,
                     )
                     for method in methods
                 }
@@ -91,9 +118,11 @@ class ChunkHtmlTextTask(WfTask):
         strategy_task: BaseChunkingStrategyTask,
         pages_text_by_url: dict[str, str],
         reqDto: IngestReqDto,
+        execCtxData: ExecCtxData,
     ) -> dict[str, list[str]]:
+        """Build one method result map `{url: [chunks...]}` for all crawled pages."""
         return {
-            url: strategy_task.build_chunks(text, reqDto)
+            url: strategy_task.build_chunks(text, reqDto, execCtxData)
             for url, text in pages_text_by_url.items()
             if text and text.strip()
         }

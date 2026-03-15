@@ -165,10 +165,13 @@ class ExtractHtmlFilesTask(WfTask):
     def __init__(self):
         super().__init__()
         self.task_name = "EXTRACT_HTML_FILES_TASK"
-        self._tasks = [CrawlHtmlFilesTask(), ChunkHtmlTextTask()]
+
+    @staticmethod
+    def _tasks() -> list[WfTask]:
+        return [CrawlHtmlFilesTask(), ChunkHtmlTextTask()]
 
     def execute(self, reqDto: IngestReqDto, respDto: IngestRespDto, execCtxData: ExecCtxData) -> int:
-        for task in self._tasks:
+        for task in self._tasks():
             result = task.execute(reqDto, respDto, execCtxData)
             if result != WfReturnCodes.SUCCESS:
                 return result

@@ -8,8 +8,9 @@ from app.workflows.data_load.tasks.extract_html_files import CrawlHtmlFilesTask,
 
 
 class IngestWfFacade:
-    def __init__(self):
-        self.tasks: list[WfTask] = [
+    @staticmethod
+    def _tasks() -> list[WfTask]:
+        return [
             CrawlHtmlFilesTask(),
             ChunkHtmlTextTask(),
         ]
@@ -28,7 +29,7 @@ class IngestWfFacade:
         ingest_status["last_started_at"] = datetime.now().isoformat(timespec="seconds")
         ingest_status["completed"] = False
 
-        for task in self.tasks:
+        for task in self._tasks():
             result = task.execute(reqDto, respDto, execCtxData)
             if result != WfReturnCodes.SUCCESS:
                 ingest_status["last_completed_at"] = datetime.now().isoformat(timespec="seconds")
