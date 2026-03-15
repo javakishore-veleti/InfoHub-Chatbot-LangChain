@@ -1,0 +1,112 @@
+.cat-alert {
+  background: var(--ih-warn-bg);
+  color: var(--ih-warn-text);
+  border: 1px solid color-mix(in srgb, var(--ih-warn-text) 20%, transparent);
+  border-radius: var(--ih-radius-md);
+  padding: 12px 16px;
+  font-size: var(--ih-font-base);
+  margin-bottom: var(--ih-space-lg);
+}
+
+.cat-toolbar {
+  display: flex;
+  gap: var(--ih-space-md);
+  margin-bottom: var(--ih-space-lg);
+}
+
+.cat-search {
+  flex: 1;
+  position: relative;
+}
+
+.cat-search__icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ih-muted);
+  font-size: var(--ih-font-base);
+}
+
+.cat-search .form-control {
+  padding-left: 36px;
+}
+
+.cat-sort {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+/* Card grid */
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--ih-space-lg);
+}
+
+.cat-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--ih-surface);
+  border: 1px solid var(--ih-border);
+  border-left: 3px solid var(--cat-status-color, var(--ih-border));
+  border-radius: var(--ih-radius-lg);
+  box-shadow: var(--ih-elevation-1);
+  padding: var(--ih-space-lg);
+  text-decoration: none;
+  color: var(--ih-text);
+  transition: box-shadow var(--ih-transition-normal), border-color var(--ih-transition-normal), transform var(--ih-transition-normal);
+}
+
+.cat-card:hover {
+  box-shadow: var(--ih-elevation-2);
+  border-color: var(--ih-brand);
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: var(--ih-text);
+}
+
+.cat-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--ih-space-md);
+}
+
+.cat-card__title {
+  font-size: var(--ih-font-md);
+  font-weight: 700;
+  margin: 0 0 var(--ih-space-sm);
+}
+
+.cat-card__desc {
+  color: var(--ih-muted);
+  font-size: var(--ih-font-base);
+  margin: 0 0 var(--ih-space-md);
+  flex: 1;
+}
+
+.cat-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--ih-font-sm);
+  margin-bottom: var(--ih-space-md);
+}
+
+.cat-card__action {
+  margin-top: auto;
+}
+
+@media (max-width: 575.98px) {
+  .cat-toolbar {
+    flex-direction: column;
+  }
+  .cat-sort {
+    width: 100%;
+  }
+  .cat-grid {
+    grid-template-columns: 1fr;
+  }
+}

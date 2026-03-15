@@ -1,0 +1,74 @@
+<div class="ih-page-header">
+  <div>
+    <h1 class="ih-page-title">Workflow Catalog</h1>
+    <p class="ih-page-subtitle">Browse, search, and launch ingest workflows</p>
+  </div>
+  <button class="btn btn-outline-primary" (click)="reload()">
+    <i class="fa-solid fa-rotate-right me-2"></i>Refresh
+  </button>
+</div>
+
+@if (!apiConnected()) {
+  <div class="cat-alert">
+    <i class="fa-solid fa-info-circle me-2"></i>
+    <span>API unavailable — showing fallback workflow data. Start the backend for live operations.</span>
+  </div>
+}
+
+<!-- Search & Sort Bar -->
+<div class="cat-toolbar">
+  <div class="cat-search">
+    <i class="fa-solid fa-magnifying-glass cat-search__icon"></i>
+    <input class="form-control"
+           type="text"
+           placeholder="Search workflows..."
+           [ngModel]="searchQuery()"
+           (ngModelChange)="onSearch($event)" />
+  </div>
+  <select class="form-select cat-sort" [ngModel]="sortBy()" (ngModelChange)="onSort($event)">
+    <option value="name-asc">Name A–Z</option>
+    <option value="name-desc">Name Z–A</option>
+    <option value="last-executed">Last Executed</option>
+    <option value="status">Status</option>
+  </select>
+</div>
+
+@if (loading()) {
+  <div class="cat-grid">
+    <app-loading-skeleton variant="card" [count]="3" />
+  </div>
+} @else if (filteredWorkflows().length === 0) {
+  <app-empty-state
+    icon="fa-diagram-project"
+    title="No workflows found"
+    description="Try a different search term or refresh the catalog." />
+} @else {
+  <div class="cat-grid">
+    @for (wf of filteredWorkflows(); track wf.workflow_id) {
+      <a class="cat-card"
+         [routerLink]="['/ingest/run']"
+         [queryParams]="{ workflow: wf.workflow_selector }"
+         [style.--cat-status-color]="statusBarColor(wf.last_execution.status)">
+        <div class="cat-card__header">
+          <div class="ih-icon-pill"><i class="fa-solid fa-diagram-project"></i></div>
+          <app-status-badge [status]="wf.last_execution.status" />
+        </div>
+        <h3 class="cat-card__title">{{ wf.display_name }}</h3>
+        <p class="cat-card__desc">{{ wf.short_description }}</p>
+        <div class="cat-card__meta">
+          <span><code>{{ wf.workflow_selector }}</code></span>
+          @if (wf.last_execution.started_at) {
+            <span class="text-muted">
+              <i class="fa-regular fa-clock me-1"></i>{{ wf.last_execution.started_at | relativeTime }}
+            </span>
+          }
+        </div>
+        <div class="cat-card__action">
+          <span class="btn btn-primary btn-sm w-100">
+            <i class="fa-solid fa-play me-1"></i>Run Workflow
+          </span>
+        </div>
+      </a>
+    }
+  </div>
+}

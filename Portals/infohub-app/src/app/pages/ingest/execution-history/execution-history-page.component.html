@@ -1,0 +1,147 @@
+<div class="ih-page-header">
+  <div>
+    <h1 class="ih-page-title">Execution History</h1>
+    <p class="ih-page-subtitle">Track, filter, and inspect past workflow runs</p>
+  </div>
+  <button class="btn btn-outline-primary" (click)="refresh(pageData().page)">
+    <i class="fa-solid fa-rotate-right me-2"></i>Refresh
+  </button>
+</div>
+
+<!-- Filters -->
+<form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="exec-filters ih-card">
+  <div class="exec-filters__grid">
+    <div>
+      <label class="form-label">Workflow</label>
+      <select class="form-select" formControlName="workflow_id">
+        <option value="">All Workflows</option>
+        @for (opt of workflowOptions(); track opt.workflow_id) {
+          <option [value]="opt.workflow_id">{{ opt.display_name }}</option>
+        }
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Status</label>
+      <select class="form-select" formControlName="status">
+        <option value="">All Statuses</option>
+        <option value="IN_PROGRESS">In Progress</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="FAILED">Failed</option>
+        <option value="SKIPPED">Skipped</option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Started From</label>
+      <input class="form-control" type="datetime-local" formControlName="started_from" />
+    </div>
+    <div>
+      <label class="form-label">Started To</label>
+      <input class="form-control" type="datetime-local" formControlName="started_to" />
+    </div>
+    <div class="exec-filters__actions">
+      <button class="btn btn-primary" type="submit"><i class="fa-solid fa-filter me-1"></i>Apply</button>
+      <button class="btn btn-outline-secondary" type="button" (click)="clearFilters()">Clear</button>
+    </div>
+  </div>
+</form>
+
+@if (error()) {
+  <div class="exec-error">
+    <i class="fa-solid fa-circle-exclamation me-2"></i>{{ error() }}
+  </div>
+}
+
+@if (loading()) {
+  <div class="ih-card">
+    <app-loading-skeleton variant="table-row" [count]="5" />
+  </div>
+} @else if (pageData().items.length === 0) {
+  <app-empty-state
+    icon="fa-clock-rotate-left"
+    title="No executions found"
+    description="Try adjusting your filters or run a workflow first."
+    actionLabel="Run Workflow"
+    actionLink="/ingest/run" />
+} @else {
+  <div class="ih-card" style="padding: 0; overflow: hidden;">
+    <div class="ih-table-wrap" style="border: none;">
+      <table class="ih-table table">
+        <thead>
+          <tr>
+            <th>Execution ID</th>
+            <th>Workflow</th>
+            <th>Status</th>
+            <th>Started</th>
+            <th>Completed</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of pageData().items; track row.execution_id) {
+            <tr>
+              <td>
+                <a [routerLink]="['/ingest/executions', row.execution_id]" class="exec-id-link">
+                  <code>{{ row.execution_id | slice:0:8 }}...</code>
+                </a>
+              </td>
+              <td>
+                <div class="fw-semibold">{{ row.display_name }}</div>
+                <small class="text-muted">{{ row.workflow_id }}</small>
+              </td>
+              <td><app-status-badge [status]="row.status" /></td>
+              <td>
+                <div>{{ row.started_at | date:'medium' }}</div>
+                <small class="text-muted">{{ row.started_at | relativeTime }}</small>
+              </td>
+              <td>
+                @if (row.completed_at) {
+                  <div>{{ row.completed_at | date:'medium' }}</div>
+                  <small class="text-muted">{{ row.completed_at | relativeTime }}</small>
+                } @else {
+                  <span class="text-muted">-</span>
+                }
+              </td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-secondary"
+                   [routerLink]="['/ingest/executions', row.execution_id]"
+                   title="View Details">
+                  <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="exec-pagination">
+    <span class="text-muted" style="font-size: var(--ih-font-sm);">
+      {{ pageData().total_items }} total executions
+    </span>
+    <div class="ih-pagination">
+      <button class="ih-pagination__btn"
+              [disabled]="pageData().page <= 1"
+              (click)="refresh(pageData().page - 1)">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      @for (p of pageNumbers(); track $index) {
+        @if (p === '...') {
+          <span class="ih-pagination__ellipsis">...</span>
+        } @else {
+          <button class="ih-pagination__btn"
+                  [class.ih-pagination__btn--active]="p === pageData().page"
+                  (click)="refresh(+p)">
+            {{ p }}
+          </button>
+        }
+      }
+      <button class="ih-pagination__btn"
+              [disabled]="pageData().page >= pageData().total_pages"
+              (click)="refresh(pageData().page + 1)">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+}

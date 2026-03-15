@@ -1,0 +1,114 @@
+@if (mobileOpen()) {
+  <div class="ih-sidebar-backdrop" (click)="onBackdropClick()"></div>
+}
+
+<aside class="ih-sidebar"
+       [class.ih-sidebar--collapsed]="collapsed()"
+       [class.ih-sidebar--mobile-open]="mobileOpen()">
+
+  <!-- Brand -->
+  <div class="ih-sidebar__brand">
+    <span class="ih-sidebar__logo">
+      <i class="fa-solid fa-layer-group"></i>
+    </span>
+    @if (!collapsed()) {
+      <span class="ih-sidebar__brand-text">
+        <span class="ih-sidebar__brand-name">InfoHub</span>
+        <span class="ih-sidebar__brand-tag">Platform</span>
+      </span>
+    }
+  </div>
+
+  <!-- Navigation -->
+  <nav class="ih-sidebar__nav">
+
+    <!-- Main -->
+    <div class="ih-sidebar__section">
+      @if (!collapsed()) {
+        <div class="ih-sidebar__section-label">Main</div>
+      }
+      <a class="ih-sidebar__link"
+         routerLink="/dashboard"
+         routerLinkActive="ih-sidebar__link--active"
+         [routerLinkActiveOptions]="{ exact: true }"
+         (click)="mobileClose.emit()">
+        <i class="fa-solid fa-gauge-high ih-sidebar__link-icon"></i>
+        @if (!collapsed()) {
+          <span class="ih-sidebar__link-text">Dashboard</span>
+        }
+      </a>
+    </div>
+
+    <!-- Ingest -->
+    <div class="ih-sidebar__section">
+      @if (!collapsed()) {
+        <button class="ih-sidebar__section-toggle" (click)="toggleSection('ingest')">
+          <span>Ingest</span>
+          <i class="fa-solid fa-chevron-down ih-sidebar__chevron"
+             [class.ih-sidebar__chevron--open]="isSectionOpen('ingest')"></i>
+        </button>
+      }
+
+      @if (isSectionOpen('ingest') || collapsed()) {
+        <div class="ih-sidebar__section-body">
+          <a class="ih-sidebar__link"
+             routerLink="/ingest/workflows"
+             routerLinkActive="ih-sidebar__link--active"
+             (click)="mobileClose.emit()">
+            <i class="fa-solid fa-diagram-project ih-sidebar__link-icon"></i>
+            @if (!collapsed()) {
+              <span class="ih-sidebar__link-text">Workflow Catalog</span>
+            }
+          </a>
+          <a class="ih-sidebar__link"
+             routerLink="/ingest/run"
+             routerLinkActive="ih-sidebar__link--active"
+             (click)="mobileClose.emit()">
+            <i class="fa-solid fa-play ih-sidebar__link-icon"></i>
+            @if (!collapsed()) {
+              <span class="ih-sidebar__link-text">Run Workflow</span>
+            }
+          </a>
+          <a class="ih-sidebar__link"
+             routerLink="/ingest/executions"
+             routerLinkActive="ih-sidebar__link--active"
+             [routerLinkActiveOptions]="{ exact: true }"
+             (click)="mobileClose.emit()">
+            <i class="fa-solid fa-clock-rotate-left ih-sidebar__link-icon"></i>
+            @if (!collapsed()) {
+              <span class="ih-sidebar__link-text">Execution History</span>
+            }
+          </a>
+        </div>
+      }
+    </div>
+
+    <!-- Build (disabled) -->
+    <div class="ih-sidebar__section">
+      @if (!collapsed()) {
+        <div class="ih-sidebar__section-label">Build</div>
+      }
+      <span class="ih-sidebar__link ih-sidebar__link--disabled">
+        <i class="fa-solid fa-hexagon-nodes ih-sidebar__link-icon"></i>
+        @if (!collapsed()) {
+          <span class="ih-sidebar__link-text">Model Build</span>
+          <span class="ih-sidebar__soon">Soon</span>
+        }
+      </span>
+    </div>
+
+    <!-- Settings (disabled) -->
+    <div class="ih-sidebar__section">
+      @if (!collapsed()) {
+        <div class="ih-sidebar__section-label">Settings</div>
+      }
+      <span class="ih-sidebar__link ih-sidebar__link--disabled">
+        <i class="fa-solid fa-shield-halved ih-sidebar__link-icon"></i>
+        @if (!collapsed()) {
+          <span class="ih-sidebar__link-text">Administration</span>
+          <span class="ih-sidebar__soon">Soon</span>
+        }
+      </span>
+    </div>
+  </nav>
+</aside>

@@ -1,0 +1,31 @@
+<header class="ih-topbar">
+  <button class="ih-topbar__hamburger d-lg-none" (click)="toggleSidebar.emit()" aria-label="Toggle navigation">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <button class="ih-topbar__collapse-btn d-none d-lg-flex" (click)="toggleCollapse.emit()" aria-label="Collapse sidebar">
+    <i class="fa-solid fa-bars-staggered"></i>
+  </button>
+
+  <app-breadcrumb class="ih-topbar__breadcrumb"></app-breadcrumb>
+
+  <div class="ih-topbar__actions">
+    <span class="ih-topbar__status"
+          [class.ih-topbar__status--online]="apiOnline()"
+          [title]="apiOnline() ? 'API Connected' : 'API Offline'">
+      <span class="ih-topbar__status-dot"></span>
+      <span class="ih-topbar__status-label d-none d-xl-inline">{{ apiOnline() ? 'Online' : 'Offline' }}</span>
+    </span>
+
+    <button class="ih-topbar__icon-btn" (click)="toggleTheme()" [attr.aria-label]="isDark() ? 'Switch to light' : 'Switch to dark'">
+      <i class="fa-solid" [class.fa-sun]="isDark()" [class.fa-moon]="!isDark()"></i>
+    </button>
+
+    <div class="ih-topbar__user">
+      <div class="ih-topbar__avatar">
+        <i class="fa-solid fa-user"></i>
+      </div>
+      <span class="ih-topbar__user-name d-none d-xl-inline">Operator</span>
+    </div>
+  </div>
+</header>

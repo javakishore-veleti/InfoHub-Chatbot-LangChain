@@ -1,0 +1,131 @@
+<div class="ih-page-header">
+  <div>
+    <h1 class="ih-page-title">Run Workflow</h1>
+    <p class="ih-page-subtitle">Configure and execute an ingest workflow</p>
+  </div>
+</div>
+
+@if (loading()) {
+  <app-loading-skeleton variant="card" [count]="2" />
+} @else if (workflow(); as wf) {
+  <!-- Workflow Info -->
+  <div class="run-info ih-card">
+    <div class="run-info__header">
+      <div class="ih-icon-pill"><i class="fa-solid fa-diagram-project"></i></div>
+      <div>
+        <h3>{{ wf.title || wf.display_name }}</h3>
+        <p class="text-muted mb-0">{{ wf.description || wf.short_description }}</p>
+      </div>
+    </div>
+    <div class="run-info__meta">
+      <span>Selector: <code>{{ wf.workflow_selector }}</code></span>
+      <span>ID: <code>{{ wf.workflow_id }}</code></span>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="run-alert run-alert--warn">
+      <i class="fa-solid fa-triangle-exclamation me-2"></i>{{ error() }}
+    </div>
+  }
+
+  @if (form(); as formGroup) {
+    <form [formGroup]="formGroup" (ngSubmit)="submit()">
+      <!-- Sectioned fields -->
+      @for (section of fieldSections; track section.title) {
+        @if (getFieldsForSection(section).length > 0) {
+          <fieldset class="run-section ih-card">
+            <legend class="run-section__title">
+              <i class="fa-solid {{ section.icon }} me-2"></i>{{ section.title }}
+            </legend>
+            <div class="run-fields">
+              @for (field of getFieldsForSection(section); track field.key) {
+                <div class="run-field" [class.run-field--full]="field.type === 'textarea-list' || field.type === 'multiselect'">
+                  <label class="form-label" [for]="field.key">
+                    {{ field.label }}
+                    @if (field.required) {
+                      <span class="required-star">*</span>
+                    }
+                  </label>
+
+                  @switch (field.type) {
+                    @case ('textarea-list') {
+                      <textarea class="form-control"
+                                [id]="field.key"
+                                [formControlName]="field.key"
+                                rows="4"
+                                [class.is-invalid]="isInvalid(field.key)"
+                                [placeholder]="field.description || 'One value per line'"></textarea>
+                    }
+                    @case ('multiselect') {
+                      <select class="form-select"
+                              [id]="field.key"
+                              [formControlName]="field.key"
+                              multiple
+                              [class.is-invalid]="isInvalid(field.key)">
+                        @for (opt of optionsFor(field); track opt.value) {
+                          <option [value]="opt.value">{{ opt.label }}</option>
+                        }
+                      </select>
+                    }
+                    @case ('checkbox') {
+                      <div class="form-check mt-1">
+                        <input class="form-check-input" type="checkbox" [id]="field.key" [formControlName]="field.key" />
+                      </div>
+                    }
+                    @default {
+                      <input class="form-control"
+                             [id]="field.key"
+                             [type]="inputType(field)"
+                             [formControlName]="field.key"
+                             [class.is-invalid]="isInvalid(field.key)"
+                             [placeholder]="field.placeholder || ''" />
+                    }
+                  }
+
+                  @if (isInvalid(field.key)) {
+                    <div class="invalid-feedback d-block">This field is required.</div>
+                  }
+                  @if (field.description && field.type !== 'textarea-list') {
+                    <small class="text-muted d-block mt-1">{{ field.description }}</small>
+                  }
+                </div>
+              }
+            </div>
+          </fieldset>
+        }
+      }
+
+      <!-- Unsectioned fields -->
+      @if (getUnsectionedFields().length > 0) {
+        <fieldset class="run-section ih-card">
+          <legend class="run-section__title">
+            <i class="fa-solid fa-ellipsis me-2"></i>Other
+          </legend>
+          <div class="run-fields">
+            @for (field of getUnsectionedFields(); track field.key) {
+              <div class="run-field">
+                <label class="form-label" [for]="field.key">{{ field.label }}</label>
+                <input class="form-control" [id]="field.key" [type]="inputType(field)" [formControlName]="field.key" />
+              </div>
+            }
+          </div>
+        </fieldset>
+      }
+
+      <!-- Actions -->
+      <div class="run-actions">
+        <button class="btn btn-outline-secondary" type="button" (click)="resetForm()">
+          <i class="fa-solid fa-rotate-left me-1"></i>Reset to Defaults
+        </button>
+        <button class="btn btn-primary px-4" type="submit" [disabled]="isSubmitting() || !apiConnected()">
+          @if (isSubmitting()) {
+            <i class="fa-solid fa-spinner fa-spin me-2"></i>Running...
+          } @else {
+            <i class="fa-solid fa-play me-2"></i>Run Workflow
+          }
+        </button>
+      </div>
+    </form>
+  }
+}

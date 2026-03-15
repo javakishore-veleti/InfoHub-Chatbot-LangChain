@@ -1,0 +1,21 @@
+<div class="ih-shell" [class.ih-shell--collapsed]="sidebarCollapsed()">
+  <app-sidebar
+    [collapsed]="sidebarCollapsed()"
+    [mobileOpen]="mobileSidebarOpen()"
+    (mobileClose)="closeMobileSidebar()">
+  </app-sidebar>
+
+  <div class="ih-shell__main">
+    <app-topbar
+      (toggleSidebar)="toggleMobileSidebar()"
+      (toggleCollapse)="toggleCollapse()">
+    </app-topbar>
+
+    <div class="ih-shell__content">
+      <router-outlet />
+    </div>
+  </div>
+
+  <app-toast-container />
+  <app-confirm-dialog />
+</div>

@@ -1,0 +1,35 @@
+.ih-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.ih-shell__main {
+  flex: 1;
+  margin-left: 260px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left var(--ih-transition-normal);
+}
+
+.ih-shell--collapsed .ih-shell__main {
+  margin-left: 68px;
+}
+
+.ih-shell__content {
+  flex: 1;
+  padding: var(--ih-space-lg);
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 991.98px) {
+  .ih-shell__main {
+    margin-left: 0 !important;
+  }
+
+  .ih-shell__content {
+    padding: var(--ih-space-md);
+  }
+}

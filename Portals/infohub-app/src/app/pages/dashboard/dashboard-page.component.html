@@ -1,0 +1,112 @@
+<div class="ih-page-header">
+  <div>
+    <h1 class="ih-page-title">Dashboard</h1>
+    <p class="ih-page-subtitle">Operational overview and quick actions</p>
+  </div>
+</div>
+
+<!-- Metrics -->
+<div class="dash-metrics">
+  <div class="ih-metric">
+    <div class="ih-metric__label">Total Executions</div>
+    <div class="ih-metric__value">
+      <i class="fa-solid fa-chart-simple me-2 text-primary"></i>{{ totalExec() }}
+    </div>
+  </div>
+  <div class="ih-metric">
+    <div class="ih-metric__label">Completed</div>
+    <div class="ih-metric__value">
+      <i class="fa-solid fa-circle-check me-2" style="color: var(--ih-success-text)"></i>{{ completedCount() }}
+    </div>
+  </div>
+  <div class="ih-metric">
+    <div class="ih-metric__label">Failed</div>
+    <div class="ih-metric__value">
+      <i class="fa-solid fa-circle-xmark me-2" style="color: var(--ih-danger-text)"></i>{{ failedCount() }}
+    </div>
+  </div>
+  <div class="ih-metric">
+    <div class="ih-metric__label">In Progress</div>
+    <div class="ih-metric__value">
+      <i class="fa-solid fa-hourglass-half me-2" style="color: var(--ih-warn-text)"></i>{{ inProgressCount() }}
+    </div>
+  </div>
+</div>
+
+<div class="dash-grid">
+  <!-- Recent Executions -->
+  <section class="ih-card dash-recent">
+    <div class="dash-section-header">
+      <h3><i class="fa-solid fa-clock-rotate-left me-2"></i>Recent Executions</h3>
+      <a class="btn btn-outline-primary btn-sm" routerLink="/ingest/executions">View All</a>
+    </div>
+
+    @if (loading()) {
+      <app-loading-skeleton variant="table-row" [count]="4" />
+    } @else if (recentExecutions().length === 0) {
+      <p class="text-muted text-center py-4">No executions recorded yet.</p>
+    } @else {
+      <div class="ih-table-wrap">
+        <table class="ih-table table">
+          <thead>
+            <tr>
+              <th>Workflow</th>
+              <th>Status</th>
+              <th>Started</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (exec of recentExecutions(); track exec.execution_id) {
+              <tr>
+                <td>
+                  <div class="fw-semibold">{{ exec.display_name }}</div>
+                  <small class="text-muted">{{ exec.workflow_id }}</small>
+                </td>
+                <td><app-status-badge [status]="exec.status" /></td>
+                <td>
+                  <span>{{ exec.started_at | relativeTime }}</span>
+                </td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-secondary"
+                     [routerLink]="['/ingest/executions', exec.execution_id]">
+                    <i class="fa-solid fa-arrow-right"></i>
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <!-- Quick Launch -->
+  <section class="ih-card dash-launch">
+    <div class="dash-section-header">
+      <h3><i class="fa-solid fa-rocket me-2"></i>Quick Launch</h3>
+      <a class="btn btn-outline-primary btn-sm" routerLink="/ingest/workflows">Catalog</a>
+    </div>
+
+    @if (workflows().length === 0) {
+      <p class="text-muted text-center py-4">No workflows available.</p>
+    } @else {
+      @for (wf of workflows(); track wf.workflow_id) {
+        <div class="dash-wf-item">
+          <div class="dash-wf-info">
+            <div class="ih-icon-pill"><i class="fa-solid fa-diagram-project"></i></div>
+            <div>
+              <div class="fw-semibold">{{ wf.display_name }}</div>
+              <small class="text-muted">{{ wf.short_description }}</small>
+            </div>
+          </div>
+          <a class="btn btn-primary btn-sm"
+             [routerLink]="['/ingest/run']"
+             [queryParams]="{ workflow: wf.workflow_selector }">
+            <i class="fa-solid fa-play me-1"></i>Run
+          </a>
+        </div>
+      }
+    }
+  </section>
+</div>

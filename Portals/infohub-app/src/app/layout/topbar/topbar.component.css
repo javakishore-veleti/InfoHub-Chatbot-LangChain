@@ -1,0 +1,127 @@
+.ih-topbar {
+  height: 56px;
+  background: var(--ih-topbar-bg);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--ih-border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--ih-space-lg);
+  gap: var(--ih-space-md);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.ih-topbar__breadcrumb {
+  flex: 1;
+  min-width: 0;
+}
+
+.ih-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ih-space-sm);
+  flex-shrink: 0;
+}
+
+/* Hamburger / Collapse */
+
+.ih-topbar__hamburger,
+.ih-topbar__collapse-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ih-radius-sm);
+  border: 1px solid var(--ih-border);
+  background: transparent;
+  color: var(--ih-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--ih-transition-fast), color var(--ih-transition-fast);
+  flex-shrink: 0;
+}
+
+.ih-topbar__hamburger:hover,
+.ih-topbar__collapse-btn:hover {
+  background: var(--ih-soft);
+  color: var(--ih-text);
+}
+
+/* Icon button */
+
+.ih-topbar__icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ih-radius-sm);
+  border: 1px solid var(--ih-border);
+  background: transparent;
+  color: var(--ih-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--ih-transition-fast), color var(--ih-transition-fast);
+}
+
+.ih-topbar__icon-btn:hover {
+  background: var(--ih-soft);
+  color: var(--ih-text);
+}
+
+/* Status */
+
+.ih-topbar__status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: var(--ih-font-sm);
+  font-weight: 600;
+  background: var(--ih-danger-bg);
+  color: var(--ih-danger-text);
+}
+
+.ih-topbar__status--online {
+  background: var(--ih-success-bg);
+  color: var(--ih-success-text);
+}
+
+.ih-topbar__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* User */
+
+.ih-topbar__user {
+  display: flex;
+  align-items: center;
+  gap: var(--ih-space-sm);
+  padding: 4px 10px 4px 4px;
+  border-radius: var(--ih-radius-sm);
+  border: 1px solid var(--ih-border);
+  cursor: default;
+}
+
+.ih-topbar__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--ih-radius-sm);
+  background: var(--ih-brand);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--ih-font-sm);
+}
+
+.ih-topbar__user-name {
+  font-size: var(--ih-font-base);
+  font-weight: 600;
+  color: var(--ih-text);
+}
