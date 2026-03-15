@@ -14,6 +14,10 @@
     "setup:local:sync": "npm run uv:sync",
     "setup:local:python:version": "npm run uv:python:version",
     "setup:local:deps:check": "npm run uv:deps:check",
+    "setup:local:ingest:run": "npm run ingest:run",
+    "setup:local:ingest:run:json": "npm run ingest:run:json",
+    "setup:local:ingest:run:fetch-again": "npm run ingest:run:fetch-again",
+    "setup:local:workflow:run": "npm run workflow:run",
     "venv:setup": "bash ./scripts/local-env.sh setup",
     "venv:activate": "bash ./scripts/local-env.sh activate",
     "venv:deactivate": "bash ./scripts/local-env.sh deactivate",
@@ -21,7 +25,11 @@
     "venv:destroy": "bash ./scripts/local-env.sh destroy",
     "uv:sync": "bash ./scripts/local-env.sh sync",
     "uv:python:version": "bash ./scripts/local-env.sh python-version",
-    "uv:deps:check": "bash ./scripts/local-env.sh deps-check"
+    "uv:deps:check": "bash ./scripts/local-env.sh deps-check",
+    "ingest:run": "uv run --active python -m app.main",
+    "ingest:run:json": "uv run --active python -m app.main --json",
+    "ingest:run:fetch-again": "uv run --active python -m app.main --fetch-again --json",
+    "workflow:run": "uv run --active python -m app.main --workflow ingest"
   }
 }
 

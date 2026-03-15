@@ -1,0 +1,11 @@
+{
+  "workflows": {
+    "ingest": {
+      "completed": false,
+      "last_started_at": null,
+      "last_completed_at": null,
+      "last_return_code": null
+    }
+  }
+}
+

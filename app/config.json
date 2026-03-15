@@ -1,0 +1,28 @@
+{
+  "default_workflow": "ingest",
+  "workflows": {
+    "ingest": {
+      "seed_url": "https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html",
+      "max_tokens": 400,
+      "overlap_tokens": 40,
+      "max_pages": 30,
+      "max_depth": 2,
+      "timeout_seconds": 20,
+      "chunking_methods": [
+        "fixed_token",
+        "sliding_window_overlap",
+        "sentence",
+        "paragraph_section",
+        "semantic",
+        "hierarchical",
+        "query_aware"
+      ],
+      "query_terms": [
+        "knowledge base",
+        "foundation model",
+        "guardrails"
+      ]
+    }
+  }
+}
+
