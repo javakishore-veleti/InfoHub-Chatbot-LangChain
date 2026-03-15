@@ -1,0 +1,27 @@
+ {
+  "name": "infohub-chatbot-langchain",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Command runner scripts for local uv environment setup",
+  "scripts": {
+    "setup:local:init": "npm run setup:local:venv:setup && npm run setup:local:sync && npm run setup:local:status",
+    "setup:local:venv:setup": "npm run venv:setup",
+    "setup:local:venv:activate": "npm run venv:activate",
+    "setup:local:venv:deactivate": "npm run venv:deactivate",
+    "setup:local:venv:deactivatte": "npm run venv:deactivate",
+    "setup:local:status": "npm run venv:status",
+    "setup:local:destroy": "npm run venv:destroy",
+    "setup:local:sync": "npm run uv:sync",
+    "setup:local:python:version": "npm run uv:python:version",
+    "setup:local:deps:check": "npm run uv:deps:check",
+    "venv:setup": "bash ./scripts/local-env.sh setup",
+    "venv:activate": "bash ./scripts/local-env.sh activate",
+    "venv:deactivate": "bash ./scripts/local-env.sh deactivate",
+    "venv:status": "bash ./scripts/local-env.sh status",
+    "venv:destroy": "bash ./scripts/local-env.sh destroy",
+    "uv:sync": "bash ./scripts/local-env.sh sync",
+    "uv:python:version": "bash ./scripts/local-env.sh python-version",
+    "uv:deps:check": "bash ./scripts/local-env.sh deps-check"
+  }
+}
+
