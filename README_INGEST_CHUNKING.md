@@ -2,6 +2,8 @@
 
 ![Ingest workflow architecture](Docs/Images/Ingest/01_ingest_workflow_architecture.png)
 
+<img src="Docs/Images/Ingest/02_storage_layout_diagram.png" alt="Ingest storage layout" />
+
 ## Ingest task map
 
 Default workflow selection is `ingest/AWSBedrock` when no workflow is provided.

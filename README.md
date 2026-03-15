@@ -187,6 +187,8 @@ Task registry example:
 
 Runtime output is stored under:
 
+![Ingest storage layout](Docs/Images/Ingest/02_storage_layout_diagram.png)
+
 - `~/Runtime_Data/AI_Projects/InfoHub-Chatblot/ingest/ingest_001/YYYY-MM-DD-HH-MM/...`
 - `latest_data.json` in `ingest_001` points to the latest timestamp folder.
 - Without `--fetch-again`, the latest folder is reused when available.
