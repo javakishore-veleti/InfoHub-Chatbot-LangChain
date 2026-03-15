@@ -1,0 +1,29 @@
+.ds-error {
+  background: var(--ih-danger-bg);
+  color: var(--ih-danger-text);
+  border: 1px solid color-mix(in srgb, var(--ih-danger-text) 20%, transparent);
+  border-radius: var(--ih-radius-md);
+  padding: var(--ih-space-md);
+  margin-bottom: var(--ih-space-lg);
+  display: flex;
+  align-items: center;
+}
+
+.ds-file-count {
+  font-weight: 600;
+  color: var(--ih-brand);
+}
+
+.ds-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--ih-space-lg);
+}
+
+@media (max-width: 575.98px) {
+  .ds-pagination {
+    flex-direction: column;
+    gap: var(--ih-space-md);
+  }
+}

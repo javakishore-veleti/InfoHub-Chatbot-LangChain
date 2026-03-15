@@ -1,0 +1,122 @@
+.df-controls {
+  margin-bottom: var(--ih-space-lg);
+}
+
+.df-controls__row {
+  display: flex;
+  gap: var(--ih-space-md);
+  align-items: end;
+  margin-bottom: var(--ih-space-md);
+}
+
+.df-controls__field {
+  min-width: 260px;
+}
+
+/* ── Folder type tabs ──────────────────────── */
+
+.df-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: var(--ih-space-md);
+  border-top: 1px solid var(--ih-border);
+}
+
+.df-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid var(--ih-border);
+  border-radius: var(--ih-radius-sm);
+  background: var(--ih-surface);
+  color: var(--ih-text-secondary);
+  font-size: var(--ih-font-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--ih-transition-fast);
+}
+
+.df-tabs__tab:hover {
+  border-color: var(--ih-brand);
+  color: var(--ih-brand);
+}
+
+.df-tabs__tab--active {
+  background: var(--ih-brand);
+  border-color: var(--ih-brand);
+  color: #fff;
+}
+
+.df-tabs__tab--active:hover {
+  color: #fff;
+}
+
+.df-tabs__count {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: var(--ih-font-xs);
+  font-weight: 600;
+}
+
+.df-tabs__tab:not(.df-tabs__tab--active) .df-tabs__count {
+  background: var(--ih-soft);
+  color: var(--ih-muted);
+}
+
+/* ── File table styles ─────────────────────── */
+
+.df-filename {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.df-filename__icon {
+  color: var(--ih-brand);
+  font-size: var(--ih-font-sm);
+}
+
+.df-url {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  font-size: var(--ih-font-sm);
+  color: var(--ih-muted);
+}
+
+.df-error {
+  background: var(--ih-danger-bg);
+  color: var(--ih-danger-text);
+  border: 1px solid color-mix(in srgb, var(--ih-danger-text) 20%, transparent);
+  border-radius: var(--ih-radius-md);
+  padding: var(--ih-space-md);
+  margin-bottom: var(--ih-space-lg);
+  display: flex;
+  align-items: center;
+}
+
+.df-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--ih-space-lg);
+}
+
+@media (max-width: 767.98px) {
+  .df-controls__row {
+    flex-direction: column;
+  }
+  .df-controls__field {
+    min-width: 100%;
+  }
+  .df-pagination {
+    flex-direction: column;
+    gap: var(--ih-space-md);
+  }
+}

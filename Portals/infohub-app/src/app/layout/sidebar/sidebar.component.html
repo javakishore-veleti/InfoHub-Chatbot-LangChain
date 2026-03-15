@@ -83,6 +83,31 @@
       }
     </div>
 
+    <!-- Datalake -->
+    <div class="ih-sidebar__section">
+      @if (!collapsed()) {
+        <button class="ih-sidebar__section-toggle" (click)="toggleSection('datalake')">
+          <span>Datalake</span>
+          <i class="fa-solid fa-chevron-down ih-sidebar__chevron"
+             [class.ih-sidebar__chevron--open]="isSectionOpen('datalake')"></i>
+        </button>
+      }
+
+      @if (isSectionOpen('datalake') || collapsed()) {
+        <div class="ih-sidebar__section-body">
+          <a class="ih-sidebar__link"
+             routerLink="/datalake/datasets"
+             routerLinkActive="ih-sidebar__link--active"
+             (click)="mobileClose.emit()">
+            <i class="fa-solid fa-database ih-sidebar__link-icon"></i>
+            @if (!collapsed()) {
+              <span class="ih-sidebar__link-text">Crawled Datasets</span>
+            }
+          </a>
+        </div>
+      }
+    </div>
+
     <!-- Build (disabled) -->
     <div class="ih-sidebar__section">
       @if (!collapsed()) {

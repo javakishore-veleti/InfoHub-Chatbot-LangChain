@@ -1,0 +1,55 @@
+<div class="ih-page-header">
+  <div>
+    <h1 class="ih-page-title">File Detail</h1>
+    <p class="ih-page-subtitle">{{ fileId() }}.json</p>
+  </div>
+  <a class="btn btn-outline-secondary"
+     [routerLink]="['/datalake/datasets', workflowId(), 'files']">
+    <i class="fa-solid fa-arrow-left me-2"></i>Back to Files
+  </a>
+</div>
+
+@if (error()) {
+  <div class="fd-error">
+    <i class="fa-solid fa-circle-exclamation me-2"></i>{{ error() }}
+  </div>
+}
+
+@if (loading()) {
+  <app-loading-skeleton variant="card" [count]="1" />
+} @else if (fileDetail(); as detail) {
+  <!-- File metadata -->
+  <div class="fd-meta ih-card">
+    <div class="fd-meta__grid">
+      <div class="fd-meta__item">
+        <span class="fd-meta__label">File Name</span>
+        <span class="fd-meta__value">{{ detail.file_name }}</span>
+      </div>
+      @if (detail.url) {
+        <div class="fd-meta__item fd-meta__item--full">
+          <span class="fd-meta__label">Source URL</span>
+          <a class="fd-meta__value fd-meta__url" [href]="detail.url" target="_blank" rel="noopener">
+            {{ detail.url }}
+            <i class="fa-solid fa-arrow-up-right-from-square ms-1" style="font-size: 0.75em;"></i>
+          </a>
+        </div>
+      }
+      <div class="fd-meta__item">
+        <span class="fd-meta__label">Folder Type</span>
+        <span class="fd-meta__value">{{ folderTypeLabel() }}</span>
+      </div>
+      <div class="fd-meta__item">
+        <span class="fd-meta__label">Size</span>
+        <span class="fd-meta__value">{{ formatSize(detail.size_bytes) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- File content -->
+  <div class="fd-content ih-card">
+    <div class="fd-content__header">
+      <i class="fa-solid fa-code me-2"></i>Content
+    </div>
+    <pre class="fd-content__json">{{ formatJson(detail.content) }}</pre>
+  </div>
+}

@@ -37,6 +37,24 @@ export const routes: Routes = [
           import('./pages/ingest/execution-detail/execution-detail-page.component').then(m => m.ExecutionDetailPageComponent),
         data: { breadcrumb: 'Execution Detail', parent: 'Ingest', icon: 'fa-magnifying-glass' },
       },
+      {
+        path: 'datalake/datasets',
+        loadComponent: () =>
+          import('./pages/datalake/crawled-datasets/crawled-datasets-page.component').then(m => m.CrawledDatasetsPageComponent),
+        data: { breadcrumb: 'Crawled Datasets', parent: 'Datalake', icon: 'fa-database' },
+      },
+      {
+        path: 'datalake/datasets/:workflowId/files',
+        loadComponent: () =>
+          import('./pages/datalake/dataset-files/dataset-files-page.component').then(m => m.DatasetFilesPageComponent),
+        data: { breadcrumb: 'Dataset Files', parent: 'Datalake', icon: 'fa-folder-open' },
+      },
+      {
+        path: 'datalake/datasets/:workflowId/files/:fileId',
+        loadComponent: () =>
+          import('./pages/datalake/file-detail/file-detail-page.component').then(m => m.FileDetailPageComponent),
+        data: { breadcrumb: 'File Detail', parent: 'Datalake', icon: 'fa-file-code' },
+      },
       { path: '**', redirectTo: 'dashboard' },
     ],
   },

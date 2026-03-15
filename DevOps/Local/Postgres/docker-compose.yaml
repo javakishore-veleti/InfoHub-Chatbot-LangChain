@@ -1,0 +1,29 @@
+name: InfoHub-Chatbot-LangChain
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: infohub-chatbot-lc-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: infohub
+      POSTGRES_PASSWORD: infohub_dev
+      POSTGRES_DB: infohub
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U infohub"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - infohub-chatbot-lc-net
+
+volumes:
+  postgres-data:
+
+networks:
+  infohub-chatbot-lc-net:
+    external: true

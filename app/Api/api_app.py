@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.Api.db.sqlite_db import init_db
-from app.Api.routers import administration, chat, executions, health, ingest, model_build, workflows
+from app.Api.routers import administration, chat, datalake, executions, health, ingest, model_build, workflows
 
 
 def create_api_app() -> FastAPI:
@@ -33,6 +33,7 @@ def create_api_app() -> FastAPI:
     app.include_router(chat.router, prefix="/api/v1")
     app.include_router(model_build.router, prefix="/api/v1")
     app.include_router(administration.router, prefix="/api/v1")
+    app.include_router(datalake.router, prefix="/api/v1")
 
     return app
 

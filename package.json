@@ -38,7 +38,12 @@
     "start:api-ui": "bash ./scripts/start-api-ui.sh",
     "start:api:ps": "powershell -ExecutionPolicy Bypass -File ./scripts/start-api.ps1",
     "start:ui:ps": "powershell -ExecutionPolicy Bypass -File ./scripts/start-ui.ps1",
-    "start:api-ui:ps": "powershell -ExecutionPolicy Bypass -File ./scripts/start-api-ui.ps1"
+    "start:api-ui:ps": "powershell -ExecutionPolicy Bypass -File ./scripts/start-api-ui.ps1",
+    "start:api-ui:docker": "bash ./scripts/start-api-ui-docker.sh",
+    "start:api-ui:docker:ps": "powershell -ExecutionPolicy Bypass -File ./scripts/start-api-ui-docker.ps1",
+    "devops:docker:start-all": "bash ./DevOps/Local/docker-all-up.sh",
+    "devops:docker:stop-all": "bash ./DevOps/Local/docker-all-down.sh",
+    "devops:docker:status-all": "bash ./DevOps/Local/docker-all-status.sh"
   }
 }
 
