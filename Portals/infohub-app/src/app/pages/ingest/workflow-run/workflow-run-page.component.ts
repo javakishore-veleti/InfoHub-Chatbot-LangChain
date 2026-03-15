@@ -36,6 +36,7 @@ export class WorkflowRunPageComponent implements OnInit {
   readonly isSubmitting = signal(false);
   readonly workflow = signal<WorkflowDetail | null>(null);
   readonly error = signal<string | null>(null);
+  readonly expandedHelp = signal<Set<string>>(new Set());
 
   readonly fieldSections: FieldSection[] = [
     { title: 'Crawl Configuration', icon: 'fa-spider', keys: ['seed_url', 'max_pages', 'max_depth', 'timeout_seconds'] },
@@ -101,6 +102,52 @@ export class WorkflowRunPageComponent implements OnInit {
     return !!(ctrl && ctrl.invalid && ctrl.touched);
   }
 
+  isFullWidth(field: WorkflowFieldSchema): boolean {
+    return field.type === 'textarea-list' || field.type === 'multiselect' || field.key === 'seed_url';
+  }
+
+  /* ── Help toggle ────────────────────────────── */
+
+  toggleHelp(key: string): void {
+    const current = this.expandedHelp();
+    const next = new Set(current);
+    if (next.has(key)) {
+      next.delete(key);
+    } else {
+      next.add(key);
+    }
+    this.expandedHelp.set(next);
+  }
+
+  isHelpExpanded(key: string): boolean {
+    return this.expandedHelp().has(key);
+  }
+
+  /* ── Multiselect as checkbox list ───────────── */
+
+  isOptionSelected(fieldKey: string, value: string): boolean {
+    const ctrl = this.form()?.get(fieldKey);
+    if (!ctrl) return false;
+    const arr = ctrl.value;
+    return Array.isArray(arr) && arr.includes(value);
+  }
+
+  toggleOption(fieldKey: string, value: string): void {
+    const ctrl = this.form()?.get(fieldKey);
+    if (!ctrl) return;
+    const current: string[] = Array.isArray(ctrl.value) ? [...ctrl.value] : [];
+    const idx = current.indexOf(value);
+    if (idx >= 0) {
+      current.splice(idx, 1);
+    } else {
+      current.push(value);
+    }
+    ctrl.setValue(current);
+    ctrl.markAsTouched();
+  }
+
+  /* ── Submit ─────────────────────────────────── */
+
   async submit(): Promise<void> {
     const wf = this.workflow();
     const formGroup = this.form();
@@ -161,6 +208,7 @@ export class WorkflowRunPageComponent implements OnInit {
     const wf = this.workflow();
     if (wf) {
       this.form.set(this.buildForm(wf.fields));
+      this.expandedHelp.set(new Set());
     }
   }
 
@@ -176,6 +224,9 @@ export class WorkflowRunPageComponent implements OnInit {
       let defaultValue: unknown = field.default;
       if (field.type === 'textarea-list' && Array.isArray(defaultValue)) {
         defaultValue = defaultValue.join('\n');
+      }
+      if (field.type === 'multiselect' && !Array.isArray(defaultValue)) {
+        defaultValue = [];
       }
       controls[field.key] = this.fb.control(defaultValue ?? '', validators);
     });

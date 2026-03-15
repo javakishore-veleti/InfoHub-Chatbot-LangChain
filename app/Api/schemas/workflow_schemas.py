@@ -19,6 +19,7 @@ class WorkflowFieldSchema(BaseModel):
     label: str
     type: FieldType
     description: str | None = None
+    help: str | None = None
     placeholder: str | None = None
     required: bool = False
     default: Any = None

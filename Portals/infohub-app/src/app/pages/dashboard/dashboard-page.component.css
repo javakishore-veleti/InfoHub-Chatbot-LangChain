@@ -1,3 +1,69 @@
+/* ── Welcome Hero ─────────────────────────── */
+
+.dash-hero {
+  background: var(--ih-brand-gradient);
+  border-radius: var(--ih-radius-xl);
+  padding: var(--ih-space-xl) var(--ih-space-xl);
+  margin-bottom: var(--ih-space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(79, 70, 229, 0.2);
+}
+
+.dash-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dash-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  right: 10%;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dash-hero__content {
+  position: relative;
+  z-index: 1;
+}
+
+.dash-hero__title {
+  font-size: var(--ih-font-2xl);
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.dash-hero__subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--ih-font-base);
+  margin: 0;
+  max-width: 480px;
+}
+
+.dash-hero__visual {
+  position: relative;
+  z-index: 1;
+  font-size: 3rem;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Metrics ──────────────────────────────── */
+
 .dash-metrics {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -5,22 +71,34 @@
   margin-bottom: var(--ih-space-lg);
 }
 
+/* ── Grid ─────────────────────────────────── */
+
 .dash-grid {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: var(--ih-space-lg);
 }
 
-.dash-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--ih-space-md);
+/* ── Empty state ──────────────────────────── */
+
+.dash-empty {
+  text-align: center;
+  padding: var(--ih-space-xl) var(--ih-space-md);
+  color: var(--ih-muted);
 }
 
-.dash-section-header h3 {
-  margin: 0;
+.dash-empty i {
+  font-size: 2rem;
+  margin-bottom: var(--ih-space-sm);
+  display: block;
+  opacity: 0.4;
 }
+
+.dash-empty p {
+  margin: 0 0 var(--ih-space-md);
+}
+
+/* ── Workflow Item ────────────────────────── */
 
 .dash-wf-item {
   display: flex;
@@ -30,11 +108,12 @@
   border: 1px solid var(--ih-border);
   border-radius: var(--ih-radius-md);
   margin-bottom: var(--ih-space-sm);
-  transition: background var(--ih-transition-fast);
+  transition: all var(--ih-transition-fast);
 }
 
 .dash-wf-item:hover {
-  background: var(--ih-surface-hover);
+  background: var(--ih-brand-light);
+  border-color: color-mix(in srgb, var(--ih-brand) 20%, var(--ih-border));
 }
 
 .dash-wf-info {
@@ -55,12 +134,20 @@
   text-overflow: ellipsis;
 }
 
+/* ── Responsive ───────────────────────────── */
+
 @media (max-width: 991.98px) {
   .dash-metrics {
     grid-template-columns: repeat(2, 1fr);
   }
   .dash-grid {
     grid-template-columns: 1fr;
+  }
+  .dash-hero {
+    padding: var(--ih-space-lg);
+  }
+  .dash-hero__visual {
+    display: none;
   }
 }
 

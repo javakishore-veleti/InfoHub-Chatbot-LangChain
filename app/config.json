@@ -49,7 +49,8 @@
                 "type": "url",
                 "required": true,
                 "default": "https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html",
-                "description": "Starting page for crawl."
+                "description": "Starting page URL for the web crawler.",
+                "help": "The crawler begins at this URL and follows links up to the configured depth and page limits. For HTML documentation, use the top-level page of the section you want to ingest."
               },
               {
                 "key": "max_tokens",
@@ -58,7 +59,9 @@
                 "required": true,
                 "default": 400,
                 "min": 50,
-                "max": 8000
+                "max": 8000,
+                "description": "Maximum tokens per text chunk.",
+                "help": "Controls chunk size for downstream retrieval. Smaller chunks (200\u2013400) give precise retrieval; larger chunks (800\u20132000) preserve more context. Uses the cl100k_base tokenizer."
               },
               {
                 "key": "overlap_tokens",
@@ -67,7 +70,9 @@
                 "required": true,
                 "default": 40,
                 "min": 0,
-                "max": 2000
+                "max": 2000,
+                "description": "Token overlap between consecutive chunks.",
+                "help": "Overlapping tokens help preserve context at chunk boundaries. Typical overlap is 10\u201320% of max_tokens. Set to 0 for no overlap."
               },
               {
                 "key": "max_pages",
@@ -76,7 +81,9 @@
                 "required": true,
                 "default": 30,
                 "min": 1,
-                "max": 1000
+                "max": 1000,
+                "description": "Maximum number of pages to crawl.",
+                "help": "Limits the total pages fetched from the seed URL domain. The crawler stops after reaching this count regardless of remaining links."
               },
               {
                 "key": "max_depth",
@@ -85,7 +92,9 @@
                 "required": true,
                 "default": 2,
                 "min": 0,
-                "max": 20
+                "max": 20,
+                "description": "Maximum link depth from the seed URL.",
+                "help": "Depth 0 = seed page only. Depth 1 = seed + pages linked from seed. Depth 2 = two hops from seed, etc. Higher depth discovers more content but takes longer."
               },
               {
                 "key": "timeout_seconds",
@@ -94,13 +103,16 @@
                 "required": true,
                 "default": 20,
                 "min": 1,
-                "max": 300
+                "max": 300,
+                "description": "HTTP request timeout per page.",
+                "help": "How long to wait for each page to respond before skipping it. Increase for slow servers; decrease to fail fast on unresponsive pages."
               },
               {
                 "key": "allowed_domains",
                 "label": "Allowed domains",
                 "type": "textarea-list",
-                "description": "One domain per line.",
+                "description": "Restrict crawling to these domains (one per line).",
+                "help": "Only pages on listed domains will be fetched. Leave empty to allow all domains reachable from the seed URL.",
                 "default": [
                   "docs.aws.amazon.com"
                 ]
@@ -109,7 +121,8 @@
                 "key": "allowed_path_prefixes",
                 "label": "Allowed path prefixes",
                 "type": "textarea-list",
-                "description": "One path prefix per line.",
+                "description": "Only crawl URLs matching these path prefixes (one per line).",
+                "help": "Filters URLs by path prefix to focus on a specific documentation section. E.g., \"/bedrock/latest/userguide/\" limits crawling to that subdirectory.",
                 "default": [
                   "/bedrock/latest/userguide/"
                 ]
@@ -119,6 +132,8 @@
                 "label": "Chunking methods",
                 "type": "multiselect",
                 "required": true,
+                "description": "Text chunking strategies to apply.",
+                "help": "Each method produces a separate set of chunks. Running multiple strategies lets you compare retrieval quality. Select only the methods relevant to your use case.",
                 "default": [
                   "fixed_token",
                   "sliding_window_overlap",
@@ -129,41 +144,21 @@
                   "query_aware"
                 ],
                 "options": [
-                  {
-                    "label": "Fixed token",
-                    "value": "fixed_token"
-                  },
-                  {
-                    "label": "Sliding window overlap",
-                    "value": "sliding_window_overlap"
-                  },
-                  {
-                    "label": "Sentence",
-                    "value": "sentence"
-                  },
-                  {
-                    "label": "Paragraph section",
-                    "value": "paragraph_section"
-                  },
-                  {
-                    "label": "Semantic",
-                    "value": "semantic"
-                  },
-                  {
-                    "label": "Hierarchical",
-                    "value": "hierarchical"
-                  },
-                  {
-                    "label": "Query aware",
-                    "value": "query_aware"
-                  }
+                  { "label": "Fixed token", "value": "fixed_token" },
+                  { "label": "Sliding window overlap", "value": "sliding_window_overlap" },
+                  { "label": "Sentence", "value": "sentence" },
+                  { "label": "Paragraph section", "value": "paragraph_section" },
+                  { "label": "Semantic", "value": "semantic" },
+                  { "label": "Hierarchical", "value": "hierarchical" },
+                  { "label": "Query aware", "value": "query_aware" }
                 ]
               },
               {
                 "key": "query_terms",
                 "label": "Query terms",
                 "type": "textarea-list",
-                "description": "One query term per line for query-aware chunking.",
+                "description": "Terms for query-aware chunking (one per line).",
+                "help": "Used only by the \"query_aware\" chunking method. Chunks are scored and split to maximize relevance to these terms.",
                 "default": [
                   "knowledge base",
                   "foundation model",
@@ -175,7 +170,8 @@
                 "label": "Fetch again",
                 "type": "checkbox",
                 "default": false,
-                "description": "Ignore latest cache and run a fresh crawl."
+                "description": "Re-crawl even if cached data exists.",
+                "help": "When unchecked, the workflow reuses the most recent crawl data if available. Check this to force a fresh crawl, useful when the source content has changed."
               }
             ]
           }

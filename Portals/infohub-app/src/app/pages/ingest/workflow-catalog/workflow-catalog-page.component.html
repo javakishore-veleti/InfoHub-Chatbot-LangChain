@@ -10,8 +10,13 @@
 
 @if (!apiConnected()) {
   <div class="cat-alert">
-    <i class="fa-solid fa-info-circle me-2"></i>
-    <span>API unavailable — showing fallback workflow data. Start the backend for live operations.</span>
+    <div class="cat-alert__icon">
+      <i class="fa-solid fa-info-circle"></i>
+    </div>
+    <div>
+      <strong>API Unavailable</strong>
+      <p>Showing fallback workflow data. Start the backend for live operations.</p>
+    </div>
   </div>
 }
 
@@ -50,7 +55,9 @@
          [queryParams]="{ workflow: wf.workflow_selector }"
          [style.--cat-status-color]="statusBarColor(wf.last_execution.status)">
         <div class="cat-card__header">
-          <div class="ih-icon-pill"><i class="fa-solid fa-diagram-project"></i></div>
+          <div class="cat-card__icon-wrap">
+            <i class="fa-solid fa-diagram-project"></i>
+          </div>
           <app-status-badge [status]="wf.last_execution.status" />
         </div>
         <h3 class="cat-card__title">{{ wf.display_name }}</h3>
@@ -58,7 +65,7 @@
         <div class="cat-card__meta">
           <span><code>{{ wf.workflow_selector }}</code></span>
           @if (wf.last_execution.started_at) {
-            <span class="text-muted">
+            <span class="cat-card__time">
               <i class="fa-regular fa-clock me-1"></i>{{ wf.last_execution.started_at | relativeTime }}
             </span>
           }

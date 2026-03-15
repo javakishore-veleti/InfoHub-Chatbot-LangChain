@@ -40,13 +40,32 @@
             </legend>
             <div class="run-fields">
               @for (field of getFieldsForSection(section); track field.key) {
-                <div class="run-field" [class.run-field--full]="field.type === 'textarea-list' || field.type === 'multiselect'">
+                <div class="run-field" [class.run-field--full]="isFullWidth(field)">
                   <label class="form-label" [for]="field.key">
                     {{ field.label }}
                     @if (field.required) {
                       <span class="required-star">*</span>
                     }
+                    @if (field.help) {
+                      <button type="button" class="run-help-toggle"
+                              [class.run-help-toggle--active]="isHelpExpanded(field.key)"
+                              (click)="toggleHelp(field.key)"
+                              title="Show help">
+                        <i class="fa-solid fa-circle-question"></i>
+                      </button>
+                    }
                   </label>
+
+                  @if (field.description) {
+                    <div class="run-field-desc">{{ field.description }}</div>
+                  }
+
+                  @if (field.help && isHelpExpanded(field.key)) {
+                    <div class="run-help-panel">
+                      <i class="fa-solid fa-lightbulb run-help-panel__icon"></i>
+                      <span>{{ field.help }}</span>
+                    </div>
+                  }
 
                   @switch (field.type) {
                     @case ('textarea-list') {
@@ -55,18 +74,23 @@
                                 [formControlName]="field.key"
                                 rows="4"
                                 [class.is-invalid]="isInvalid(field.key)"
-                                [placeholder]="field.description || 'One value per line'"></textarea>
+                                placeholder="One value per line"></textarea>
                     }
                     @case ('multiselect') {
-                      <select class="form-select"
-                              [id]="field.key"
-                              [formControlName]="field.key"
-                              multiple
-                              [class.is-invalid]="isInvalid(field.key)">
+                      <div class="run-checkbox-list" [class.is-invalid]="isInvalid(field.key)">
                         @for (opt of optionsFor(field); track opt.value) {
-                          <option [value]="opt.value">{{ opt.label }}</option>
+                          <label class="run-checkbox-list__item">
+                            <input type="checkbox"
+                                   class="run-checkbox-list__input"
+                                   [checked]="isOptionSelected(field.key, opt.value)"
+                                   (change)="toggleOption(field.key, opt.value)" />
+                            <span class="run-checkbox-list__check">
+                              <i class="fa-solid fa-check"></i>
+                            </span>
+                            <span class="run-checkbox-list__label">{{ opt.label }}</span>
+                          </label>
                         }
-                      </select>
+                      </div>
                     }
                     @case ('checkbox') {
                       <div class="form-check mt-1">
@@ -86,9 +110,6 @@
                   @if (isInvalid(field.key)) {
                     <div class="invalid-feedback d-block">This field is required.</div>
                   }
-                  @if (field.description && field.type !== 'textarea-list') {
-                    <small class="text-muted d-block mt-1">{{ field.description }}</small>
-                  }
                 </div>
               }
             </div>
@@ -106,6 +127,9 @@
             @for (field of getUnsectionedFields(); track field.key) {
               <div class="run-field">
                 <label class="form-label" [for]="field.key">{{ field.label }}</label>
+                @if (field.description) {
+                  <div class="run-field-desc">{{ field.description }}</div>
+                }
                 <input class="form-control" [id]="field.key" [type]="inputType(field)" [formControlName]="field.key" />
               </div>
             }

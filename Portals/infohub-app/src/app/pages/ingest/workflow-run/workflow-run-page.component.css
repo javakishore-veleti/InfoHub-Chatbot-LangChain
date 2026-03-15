@@ -1,5 +1,6 @@
 .run-info {
   margin-bottom: var(--ih-space-lg);
+  border-top: 3px solid var(--ih-brand);
 }
 
 .run-info__header {
@@ -14,13 +15,17 @@
   gap: var(--ih-space-lg);
   font-size: var(--ih-font-sm);
   color: var(--ih-muted);
+  padding-top: var(--ih-space-md);
+  border-top: 1px solid var(--ih-border);
 }
 
 .run-alert {
   border-radius: var(--ih-radius-md);
-  padding: 12px 16px;
+  padding: var(--ih-space-md);
   font-size: var(--ih-font-base);
   margin-bottom: var(--ih-space-lg);
+  display: flex;
+  align-items: center;
 }
 
 .run-alert--warn {
@@ -31,7 +36,6 @@
 
 .run-section {
   margin-bottom: var(--ih-space-lg);
-  border: 1px solid var(--ih-border);
 }
 
 .run-section__title {
@@ -40,7 +44,13 @@
   color: var(--ih-text);
   margin-bottom: var(--ih-space-md);
   padding-bottom: var(--ih-space-sm);
-  border-bottom: 1px solid var(--ih-border);
+  border-bottom: 2px solid var(--ih-brand-light);
+  display: flex;
+  align-items: center;
+}
+
+.run-section__title i {
+  color: var(--ih-brand);
 }
 
 .run-fields {
@@ -53,12 +63,140 @@
   grid-column: 1 / -1;
 }
 
+/* ── Field description (always visible) ──── */
+
+.run-field-desc {
+  font-size: var(--ih-font-sm);
+  color: var(--ih-muted);
+  margin-bottom: 6px;
+  line-height: 1.45;
+}
+
+/* ── Help toggle button ───────────────────── */
+
+.run-help-toggle {
+  background: none;
+  border: none;
+  color: var(--ih-muted);
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 0.85em;
+  transition: color var(--ih-transition-fast);
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+.run-help-toggle:hover,
+.run-help-toggle--active {
+  color: var(--ih-brand);
+}
+
+/* ── Help panel (expandable) ──────────────── */
+
+.run-help-panel {
+  background: var(--ih-brand-light);
+  border: 1px solid color-mix(in srgb, var(--ih-brand) 15%, transparent);
+  border-radius: var(--ih-radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  font-size: var(--ih-font-sm);
+  color: var(--ih-text-secondary);
+  line-height: 1.55;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  animation: run-help-in 0.2s ease-out;
+}
+
+@keyframes run-help-in {
+  from { opacity: 0; max-height: 0; }
+  to   { opacity: 1; max-height: 200px; }
+}
+
+.run-help-panel__icon {
+  color: var(--ih-brand);
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-size: 0.9em;
+}
+
+/* ── Checkbox list (replaces native multiselect) ── */
+
+.run-checkbox-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px;
+  border: 1px solid var(--ih-border);
+  border-radius: var(--ih-radius-sm);
+  padding: 12px;
+  background: var(--ih-surface);
+}
+
+.run-checkbox-list.is-invalid {
+  border-color: var(--ih-danger-text);
+}
+
+.run-checkbox-list__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--ih-radius-sm);
+  cursor: pointer;
+  transition: background var(--ih-transition-fast);
+  user-select: none;
+  font-size: var(--ih-font-base);
+  color: var(--ih-text);
+}
+
+.run-checkbox-list__item:hover {
+  background: var(--ih-soft);
+}
+
+.run-checkbox-list__input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.run-checkbox-list__check {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--ih-border);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--ih-transition-fast);
+  font-size: 0.7rem;
+  color: transparent;
+  background: var(--ih-surface);
+}
+
+.run-checkbox-list__input:checked + .run-checkbox-list__check {
+  background: var(--ih-brand-gradient);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(79, 70, 229, 0.25);
+}
+
+.run-checkbox-list__label {
+  font-weight: 500;
+}
+
+/* ── Actions ──────────────────────────────── */
+
 .run-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--ih-space-sm);
   margin-top: var(--ih-space-lg);
+  padding-top: var(--ih-space-lg);
+  border-top: 1px solid var(--ih-border);
 }
+
+/* ── Validation ───────────────────────────── */
 
 .is-invalid {
   border-color: var(--ih-danger-text) !important;

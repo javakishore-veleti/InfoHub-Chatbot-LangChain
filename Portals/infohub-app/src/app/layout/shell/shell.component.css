@@ -18,7 +18,7 @@
 
 .ih-shell__content {
   flex: 1;
-  padding: var(--ih-space-lg);
+  padding: var(--ih-space-xl) var(--ih-space-lg);
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;

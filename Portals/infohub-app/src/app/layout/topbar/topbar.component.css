@@ -1,8 +1,9 @@
 .ih-topbar {
-  height: 56px;
+  height: 60px;
   background: var(--ih-topbar-bg);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--ih-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--ih-topbar-border);
   display: flex;
   align-items: center;
   padding: 0 var(--ih-space-lg);
@@ -20,7 +21,7 @@
 .ih-topbar__actions {
   display: flex;
   align-items: center;
-  gap: var(--ih-space-sm);
+  gap: 10px;
   flex-shrink: 0;
 }
 
@@ -31,21 +32,21 @@
   width: 36px;
   height: 36px;
   border-radius: var(--ih-radius-sm);
-  border: 1px solid var(--ih-border);
+  border: none;
   background: transparent;
   color: var(--ih-muted);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background var(--ih-transition-fast), color var(--ih-transition-fast);
+  transition: all var(--ih-transition-fast);
   flex-shrink: 0;
 }
 
 .ih-topbar__hamburger:hover,
 .ih-topbar__collapse-btn:hover {
-  background: var(--ih-soft);
-  color: var(--ih-text);
+  background: var(--ih-brand-light);
+  color: var(--ih-brand);
 }
 
 /* Icon button */
@@ -54,19 +55,19 @@
   width: 36px;
   height: 36px;
   border-radius: var(--ih-radius-sm);
-  border: 1px solid var(--ih-border);
+  border: none;
   background: transparent;
   color: var(--ih-muted);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background var(--ih-transition-fast), color var(--ih-transition-fast);
+  transition: all var(--ih-transition-fast);
 }
 
 .ih-topbar__icon-btn:hover {
-  background: var(--ih-soft);
-  color: var(--ih-text);
+  background: var(--ih-brand-light);
+  color: var(--ih-brand);
 }
 
 /* Status */
@@ -75,25 +76,31 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 999px;
-  font-size: var(--ih-font-sm);
-  font-weight: 600;
-  background: var(--ih-danger-bg);
+  font-size: var(--ih-font-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: var(--ih-danger-soft);
   color: var(--ih-danger-text);
 }
 
 .ih-topbar__status--online {
-  background: var(--ih-success-bg);
+  background: var(--ih-success-soft);
   color: var(--ih-success-text);
 }
 
 .ih-topbar__status-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: currentColor;
   flex-shrink: 0;
+}
+
+.ih-topbar__status--online .ih-topbar__status-dot {
+  box-shadow: 0 0 6px currentColor;
 }
 
 /* User */
@@ -102,22 +109,27 @@
   display: flex;
   align-items: center;
   gap: var(--ih-space-sm);
-  padding: 4px 10px 4px 4px;
+  padding: 4px 12px 4px 4px;
   border-radius: var(--ih-radius-sm);
-  border: 1px solid var(--ih-border);
   cursor: default;
+  transition: background var(--ih-transition-fast);
+}
+
+.ih-topbar__user:hover {
+  background: var(--ih-soft);
 }
 
 .ih-topbar__avatar {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: var(--ih-radius-sm);
-  background: var(--ih-brand);
+  background: var(--ih-brand-gradient);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: var(--ih-font-sm);
+  box-shadow: 0 1px 4px rgba(79, 70, 229, 0.2);
 }
 
 .ih-topbar__user-name {

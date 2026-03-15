@@ -26,6 +26,7 @@ export interface WorkflowFieldSchema {
   label: string;
   type: string;
   description?: string;
+  help?: string;
   placeholder?: string;
   required?: boolean;
   default?: unknown;

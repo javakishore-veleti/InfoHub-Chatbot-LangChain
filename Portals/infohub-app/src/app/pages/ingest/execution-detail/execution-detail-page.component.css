@@ -2,8 +2,11 @@
   font-size: var(--ih-font-sm);
   color: var(--ih-muted);
   text-decoration: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin-bottom: var(--ih-space-sm);
+  transition: color var(--ih-transition-fast);
 }
 
 .det-back:hover {
@@ -12,6 +15,7 @@
 
 .det-header {
   margin-bottom: var(--ih-space-lg);
+  border-top: 3px solid var(--ih-brand);
 }
 
 .det-header__top {
@@ -28,6 +32,10 @@
 
 .det-header__id {
   font-size: var(--ih-font-base);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ih-muted);
 }
 
 .det-header__meta {
@@ -41,15 +49,15 @@
 .det-meta-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .det-meta-label {
   font-size: var(--ih-font-xs);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   color: var(--ih-muted);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .det-meta-value {
@@ -62,11 +70,13 @@
   color: var(--ih-danger-text);
   border: 1px solid color-mix(in srgb, var(--ih-danger-text) 20%, transparent);
   border-radius: var(--ih-radius-md);
-  padding: 12px 16px;
+  padding: var(--ih-space-md);
   margin-bottom: var(--ih-space-lg);
+  display: flex;
+  align-items: center;
 }
 
-/* Tabs */
+/* ── Tabs ─────────────────────────────────── */
 
 .det-tabs {
   display: flex;
@@ -75,10 +85,10 @@
 }
 
 .det-tab {
-  padding: 10px 20px;
-  background: var(--ih-soft);
-  border: 1px solid var(--ih-border);
-  border-bottom: none;
+  padding: 10px 22px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: 2px solid transparent;
   border-radius: var(--ih-radius-sm) var(--ih-radius-sm) 0 0;
   font-size: var(--ih-font-base);
   font-weight: 600;
@@ -89,19 +99,23 @@
 
 .det-tab:hover {
   color: var(--ih-text);
+  background: var(--ih-soft);
 }
 
 .det-tab--active {
   background: var(--ih-surface);
-  color: var(--ih-brand-strong);
+  color: var(--ih-brand);
   border-color: var(--ih-border);
+  border-bottom-color: var(--ih-surface);
+  box-shadow: var(--ih-elevation-1);
 }
 
 .det-tab-content {
   border-radius: 0 var(--ih-radius-lg) var(--ih-radius-lg) var(--ih-radius-lg);
+  border-top-left-radius: 0;
 }
 
-/* Overview DL */
+/* ── Overview DL ──────────────────────────── */
 
 .det-dl {
   margin: 0;
@@ -109,7 +123,7 @@
 
 .det-dl__row {
   display: flex;
-  padding: 10px 0;
+  padding: 12px 0;
   border-bottom: 1px solid color-mix(in srgb, var(--ih-border) 50%, transparent);
 }
 
@@ -130,7 +144,7 @@
   font-size: var(--ih-font-base);
 }
 
-/* JSON */
+/* ── JSON ─────────────────────────────────── */
 
 .det-json {
   background: var(--ih-code-bg);
@@ -142,4 +156,5 @@
   overflow-x: auto;
   margin: 0;
   max-height: 500px;
+  line-height: 1.6;
 }

@@ -1,34 +1,50 @@
-<div class="ih-page-header">
-  <div>
-    <h1 class="ih-page-title">Dashboard</h1>
-    <p class="ih-page-subtitle">Operational overview and quick actions</p>
+<!-- Welcome Hero -->
+<div class="dash-hero">
+  <div class="dash-hero__content">
+    <h1 class="dash-hero__title">Welcome to InfoHub</h1>
+    <p class="dash-hero__subtitle">Monitor workflows, track executions, and manage your data ingestion pipeline</p>
+  </div>
+  <div class="dash-hero__visual">
+    <i class="fa-solid fa-chart-line"></i>
   </div>
 </div>
 
 <!-- Metrics -->
 <div class="dash-metrics">
   <div class="ih-metric">
-    <div class="ih-metric__label">Total Executions</div>
-    <div class="ih-metric__value">
-      <i class="fa-solid fa-chart-simple me-2 text-primary"></i>{{ totalExec() }}
+    <div class="ih-metric__icon ih-metric__icon--brand">
+      <i class="fa-solid fa-chart-simple"></i>
+    </div>
+    <div class="ih-metric__body">
+      <div class="ih-metric__label">Total Executions</div>
+      <div class="ih-metric__value">{{ totalExec() }}</div>
     </div>
   </div>
   <div class="ih-metric">
-    <div class="ih-metric__label">Completed</div>
-    <div class="ih-metric__value">
-      <i class="fa-solid fa-circle-check me-2" style="color: var(--ih-success-text)"></i>{{ completedCount() }}
+    <div class="ih-metric__icon ih-metric__icon--success">
+      <i class="fa-solid fa-circle-check"></i>
+    </div>
+    <div class="ih-metric__body">
+      <div class="ih-metric__label">Completed</div>
+      <div class="ih-metric__value">{{ completedCount() }}</div>
     </div>
   </div>
   <div class="ih-metric">
-    <div class="ih-metric__label">Failed</div>
-    <div class="ih-metric__value">
-      <i class="fa-solid fa-circle-xmark me-2" style="color: var(--ih-danger-text)"></i>{{ failedCount() }}
+    <div class="ih-metric__icon ih-metric__icon--danger">
+      <i class="fa-solid fa-circle-xmark"></i>
+    </div>
+    <div class="ih-metric__body">
+      <div class="ih-metric__label">Failed</div>
+      <div class="ih-metric__value">{{ failedCount() }}</div>
     </div>
   </div>
   <div class="ih-metric">
-    <div class="ih-metric__label">In Progress</div>
-    <div class="ih-metric__value">
-      <i class="fa-solid fa-hourglass-half me-2" style="color: var(--ih-warn-text)"></i>{{ inProgressCount() }}
+    <div class="ih-metric__icon ih-metric__icon--warn">
+      <i class="fa-solid fa-hourglass-half"></i>
+    </div>
+    <div class="ih-metric__body">
+      <div class="ih-metric__label">In Progress</div>
+      <div class="ih-metric__value">{{ inProgressCount() }}</div>
     </div>
   </div>
 </div>
@@ -36,15 +52,22 @@
 <div class="dash-grid">
   <!-- Recent Executions -->
   <section class="ih-card dash-recent">
-    <div class="dash-section-header">
-      <h3><i class="fa-solid fa-clock-rotate-left me-2"></i>Recent Executions</h3>
+    <div class="ih-section-header">
+      <h3>
+        <span class="ih-section-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+        Recent Executions
+      </h3>
       <a class="btn btn-outline-primary btn-sm" routerLink="/ingest/executions">View All</a>
     </div>
 
     @if (loading()) {
       <app-loading-skeleton variant="table-row" [count]="4" />
     } @else if (recentExecutions().length === 0) {
-      <p class="text-muted text-center py-4">No executions recorded yet.</p>
+      <div class="dash-empty">
+        <i class="fa-regular fa-folder-open"></i>
+        <p>No executions recorded yet</p>
+        <a class="btn btn-primary btn-sm" routerLink="/ingest/run">Run Your First Workflow</a>
+      </div>
     } @else {
       <div class="ih-table-wrap">
         <table class="ih-table table">
@@ -68,7 +91,7 @@
                   <span>{{ exec.started_at | relativeTime }}</span>
                 </td>
                 <td class="text-end">
-                  <a class="btn btn-sm btn-outline-secondary"
+                  <a class="btn btn-sm btn-outline-primary"
                      [routerLink]="['/ingest/executions', exec.execution_id]">
                     <i class="fa-solid fa-arrow-right"></i>
                   </a>
@@ -83,13 +106,19 @@
 
   <!-- Quick Launch -->
   <section class="ih-card dash-launch">
-    <div class="dash-section-header">
-      <h3><i class="fa-solid fa-rocket me-2"></i>Quick Launch</h3>
+    <div class="ih-section-header">
+      <h3>
+        <span class="ih-section-icon"><i class="fa-solid fa-rocket"></i></span>
+        Quick Launch
+      </h3>
       <a class="btn btn-outline-primary btn-sm" routerLink="/ingest/workflows">Catalog</a>
     </div>
 
     @if (workflows().length === 0) {
-      <p class="text-muted text-center py-4">No workflows available.</p>
+      <div class="dash-empty">
+        <i class="fa-regular fa-folder-open"></i>
+        <p>No workflows available</p>
+      </div>
     } @else {
       @for (wf of workflows(); track wf.workflow_id) {
         <div class="dash-wf-item">

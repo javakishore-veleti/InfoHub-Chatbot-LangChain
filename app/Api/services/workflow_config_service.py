@@ -91,17 +91,71 @@ def _default_ingest_fields(workflow_config: dict[str, Any]) -> list[WorkflowFiel
         WorkflowFieldOption(label="Query aware", value="query_aware"),
     ]
     return [
-        WorkflowFieldSchema(key="seed_url", label="Seed URL", type="url", required=True, default=workflow_config.get("seed_url"), description="Starting documentation page to crawl."),
-        WorkflowFieldSchema(key="max_tokens", label="Max tokens per chunk", type="number", required=True, default=workflow_config.get("max_tokens", 400), min=50, max=8000),
-        WorkflowFieldSchema(key="overlap_tokens", label="Overlap tokens", type="number", required=True, default=workflow_config.get("overlap_tokens", 40), min=0, max=2000),
-        WorkflowFieldSchema(key="max_pages", label="Max pages", type="number", required=True, default=workflow_config.get("max_pages", 30), min=1, max=1000),
-        WorkflowFieldSchema(key="max_depth", label="Max crawl depth", type="number", required=True, default=workflow_config.get("max_depth", 2), min=0, max=20),
-        WorkflowFieldSchema(key="timeout_seconds", label="Timeout seconds", type="number", required=True, default=workflow_config.get("timeout_seconds", 20), min=1, max=300),
-        WorkflowFieldSchema(key="allowed_domains", label="Allowed domains", type="textarea-list", default=workflow_config.get("allowed_domains", []), description="One domain per line."),
-        WorkflowFieldSchema(key="allowed_path_prefixes", label="Allowed path prefixes", type="textarea-list", default=workflow_config.get("allowed_path_prefixes", []), description="One URL path prefix per line."),
-        WorkflowFieldSchema(key="chunking_methods", label="Chunking methods", type="multiselect", required=True, default=workflow_config.get("chunking_methods", []), options=method_options),
-        WorkflowFieldSchema(key="query_terms", label="Query terms", type="textarea-list", default=workflow_config.get("query_terms", []), description="One query term per line for query-aware chunking."),
-        WorkflowFieldSchema(key="fetch_again", label="Fetch again", type="checkbox", default=False, description="Create a new execution folder even if latest cached crawl exists."),
+        WorkflowFieldSchema(
+            key="seed_url", label="Seed URL", type="url", required=True,
+            default=workflow_config.get("seed_url"),
+            description="Starting page URL for the web crawler.",
+            help="The crawler begins at this URL and follows links up to the configured depth and page limits. For HTML documentation, use the top-level page of the section you want to ingest.",
+        ),
+        WorkflowFieldSchema(
+            key="max_tokens", label="Max tokens per chunk", type="number", required=True,
+            default=workflow_config.get("max_tokens", 400), min=50, max=8000,
+            description="Maximum tokens per text chunk.",
+            help="Controls chunk size for downstream retrieval. Smaller chunks (200\u2013400) give precise retrieval; larger chunks (800\u20132000) preserve more context. Uses the cl100k_base tokenizer.",
+        ),
+        WorkflowFieldSchema(
+            key="overlap_tokens", label="Overlap tokens", type="number", required=True,
+            default=workflow_config.get("overlap_tokens", 40), min=0, max=2000,
+            description="Token overlap between consecutive chunks.",
+            help="Overlapping tokens help preserve context at chunk boundaries. Typical overlap is 10\u201320% of max_tokens. Set to 0 for no overlap.",
+        ),
+        WorkflowFieldSchema(
+            key="max_pages", label="Max pages", type="number", required=True,
+            default=workflow_config.get("max_pages", 30), min=1, max=1000,
+            description="Maximum number of pages to crawl.",
+            help="Limits the total pages fetched from the seed URL domain. The crawler stops after reaching this count regardless of remaining links.",
+        ),
+        WorkflowFieldSchema(
+            key="max_depth", label="Max crawl depth", type="number", required=True,
+            default=workflow_config.get("max_depth", 2), min=0, max=20,
+            description="Maximum link depth from the seed URL.",
+            help="Depth 0 = seed page only. Depth 1 = seed + pages linked from seed. Depth 2 = two hops from seed, etc. Higher depth discovers more content but takes longer.",
+        ),
+        WorkflowFieldSchema(
+            key="timeout_seconds", label="Timeout seconds", type="number", required=True,
+            default=workflow_config.get("timeout_seconds", 20), min=1, max=300,
+            description="HTTP request timeout per page.",
+            help="How long to wait for each page to respond before skipping it. Increase for slow servers; decrease to fail fast on unresponsive pages.",
+        ),
+        WorkflowFieldSchema(
+            key="allowed_domains", label="Allowed domains", type="textarea-list",
+            default=workflow_config.get("allowed_domains", []),
+            description="Restrict crawling to these domains (one per line).",
+            help="Only pages on listed domains will be fetched. Leave empty to allow all domains reachable from the seed URL.",
+        ),
+        WorkflowFieldSchema(
+            key="allowed_path_prefixes", label="Allowed path prefixes", type="textarea-list",
+            default=workflow_config.get("allowed_path_prefixes", []),
+            description="Only crawl URLs matching these path prefixes (one per line).",
+            help='Filters URLs by path prefix to focus on a specific documentation section. E.g., "/bedrock/latest/userguide/" limits crawling to that subdirectory.',
+        ),
+        WorkflowFieldSchema(
+            key="chunking_methods", label="Chunking methods", type="multiselect", required=True,
+            default=workflow_config.get("chunking_methods", []), options=method_options,
+            description="Text chunking strategies to apply.",
+            help="Each method produces a separate set of chunks. Running multiple strategies lets you compare retrieval quality. Select only the methods relevant to your use case.",
+        ),
+        WorkflowFieldSchema(
+            key="query_terms", label="Query terms", type="textarea-list",
+            default=workflow_config.get("query_terms", []),
+            description="Terms for query-aware chunking (one per line).",
+            help='Used only by the "query_aware" chunking method. Chunks are scored and split to maximize relevance to these terms.',
+        ),
+        WorkflowFieldSchema(
+            key="fetch_again", label="Fetch again", type="checkbox", default=False,
+            description="Re-crawl even if cached data exists.",
+            help="When unchecked, the workflow reuses the most recent crawl data if available. Check this to force a fresh crawl, useful when the source content has changed.",
+        ),
     ]
 
 

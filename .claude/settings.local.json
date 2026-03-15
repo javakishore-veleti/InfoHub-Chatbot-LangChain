@@ -8,7 +8,17 @@
       "Bash(cd \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\Portals\\\\infohub-app\" && npx ng build 2>&1 | tail -20)",
       "Bash(cd \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\Portals\\\\infohub-app\" && npx ng build 2>&1 | tail -10)",
       "Bash(netstat -ano | grep :4200 | head -5)",
-      "Bash(taskkill //PID 17048 //F)"
+      "Bash(taskkill //PID 17048 //F)",
+      "Bash(cd \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\Portals\\\\infohub-app\" && npx ng build --configuration=development 2>&1 | tail -30)",
+      "Bash(cd \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\Portals\\\\infohub-app\" && npx ng build --configuration=development 2>&1 | tail -5)",
+      "Bash(find \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\app\\\\Api\" -type f -name \"*.py\" 2>/dev/null | head -20)",
+      "Bash(find \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\app\" -name \"*config*\" -o -name \"*workflow*\" 2>/dev/null | head -30)",
+      "Bash(find \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\" -name \"*.json\" -type f 2>/dev/null | grep -E \"\\(config|workflow\\)\" | head -20)",
+      "Bash(find \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\app\\\\common\" -type f -name \"*.py\" 2>/dev/null | grep -E \"\\(interface|dto\\)\" | head -20)",
+      "Bash(find \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\Portals\\\\infohub-app\\\\src\" -name \"*.ts\" -type f 2>/dev/null | grep -E \"\\(workflow|form|service\\)\" | head -15)",
+      "Bash(cd \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\Portals\\\\infohub-app\" && npx ng build --configuration=development 2>&1 | tail -20)",
+      "Bash(ls -la \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\scripts\\\\\" 2>&1 || echo \"Directory not found\")",
+      "Bash(grep -r \"redis\\\\|Redis\\\\|REDIS\\\\|cache\\\\|Cache\" \"C:\\\\Users\\\\javak\\\\PycharmProjects\\\\InfoHub-Chatbot-LangChain\\\\app\" --include=\"*.py\" 2>/dev/null | head -20)"
     ]
   }
 }

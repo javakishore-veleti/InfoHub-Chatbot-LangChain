@@ -20,8 +20,10 @@
   color: var(--ih-danger-text);
   border: 1px solid color-mix(in srgb, var(--ih-danger-text) 20%, transparent);
   border-radius: var(--ih-radius-md);
-  padding: 12px 16px;
+  padding: var(--ih-space-md);
   margin-bottom: var(--ih-space-lg);
+  display: flex;
+  align-items: center;
 }
 
 .exec-id-link {
@@ -29,7 +31,8 @@
 }
 
 .exec-id-link:hover code {
-  color: var(--ih-brand-strong);
+  color: var(--ih-brand);
+  background: var(--ih-brand-light);
 }
 
 .exec-pagination {
