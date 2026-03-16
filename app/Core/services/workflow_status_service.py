@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 from typing import Any
 
 from app.Core.repositories.execution_history_repository import ExecutionHistoryRepository
 from app.Core.repositories.workflow_status_repository import WorkflowStatusRepository
 from app.Core.utils.singleton import SingletonMeta
+
+logger = logging.getLogger(__name__)
 
 
 class WorkflowStatusService(metaclass=SingletonMeta):
@@ -32,6 +35,7 @@ class WorkflowStatusService(metaclass=SingletonMeta):
         display_name: str | None = None,
         execution_id: str | None = None,
     ) -> None:
+        logger.info("Marking workflow started: workflow_id=%s, execution_id=%s", workflow_id, execution_id)
         now = datetime.now().isoformat(timespec="seconds")
         self._status_repo.upsert_status(
             workflow_id,
@@ -53,8 +57,10 @@ class WorkflowStatusService(metaclass=SingletonMeta):
         error_message: str | None = None,
         summary: dict[str, Any] | None = None,
     ) -> None:
-        now = datetime.now().isoformat(timespec="seconds")
         completed = return_code == 0
+        logger.info("Marking workflow %s: workflow_id=%s, return_code=%d",
+                     "completed" if completed else "failed", workflow_id, return_code)
+        now = datetime.now().isoformat(timespec="seconds")
         self._status_repo.upsert_status(
             workflow_id,
             completed=completed,

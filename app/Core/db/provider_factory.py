@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import logging
 import os
 
 from app.Core.interfaces.db_interface import IDbProvider
 from app.Core.utils.singleton import SingletonMeta
+
+logger = logging.getLogger(__name__)
 
 
 class DbProviderFactory(metaclass=SingletonMeta):
@@ -24,6 +27,7 @@ class DbProviderFactory(metaclass=SingletonMeta):
             from app.Core.db.sqlite_provider import SqliteProvider
             cls._provider = SqliteProvider()
 
+        logger.info("Database provider initialized: %s", db_type)
         return cls._provider
 
     @classmethod

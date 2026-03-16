@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import math
 import os
 from datetime import datetime, timezone
@@ -8,6 +9,8 @@ from pathlib import Path
 from typing import Any
 
 from app.Api.services.datalake.base_reader import BaseStorageReader
+
+logger = logging.getLogger(__name__)
 
 
 class LocalFsReader(BaseStorageReader):
@@ -93,6 +96,8 @@ class LocalFsReader(BaseStorageReader):
                 "folder_type": folder_type,
             })
 
+        logger.debug("list_files: workflow_id=%s, folder_type=%s, page=%d — returned %d/%d files",
+                     workflow_id, folder_type, page, len(items), total)
         return items, total
 
     def get_file_content(

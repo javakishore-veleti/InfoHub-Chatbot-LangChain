@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import logging
+
 from app.common.constants.wf_constants import WfReturnCodes
 from app.common.dtos.exec_ctx_dto import ExecCtxData
 from app.common.dtos.ingest_dtos import IngestReqDto, IngestRespDto
 from app.common.interfaces.wf_interfaces import WfTask
+
+logger = logging.getLogger(__name__)
 
 
 class BaseChunkingStrategyTask(WfTask):
@@ -26,11 +30,13 @@ class BaseChunkingStrategyTask(WfTask):
             respDto.set_status("failed")
             return WfReturnCodes.FAILED
 
-        results = {
-            url: self.build_chunks(text, reqDto, execCtxData)
-            for url, text in pages_text_by_url.items()
-            if text and text.strip()
-        }
+        results: dict[str, list[str]] = {}
+        for url, text in pages_text_by_url.items():
+            if text and text.strip():
+                chunks = self.build_chunks(text, reqDto, execCtxData)
+                results[url] = chunks
+                logger.debug("[%s] Chunked %s → %d chunks", self.method_name, url, len(chunks))
+
         respDto.add_ctx_data(f"chunk_result::{self.method_name}", results)
         return WfReturnCodes.SUCCESS
 

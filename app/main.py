@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 from pathlib import Path
 import sys
 
+from app.common.logging_config import setup_logging
 from app.common.app_constants import (
     DEFAULT_CONFIG_PATH,
     DEFAULT_INGEST_STORAGE_BASE,
@@ -207,7 +209,12 @@ def _summarize_methods(chunk_results_by_method: dict[str, dict[str, list[str]]])
     }
 
 
+logger = logging.getLogger(__name__)
+
+
 def main() -> int:
+    setup_logging()
+
     parser = build_parser()
     args = parser.parse_args()
 
@@ -218,6 +225,8 @@ def main() -> int:
         parser.error(str(err))
 
     _validate_ingest_config(parser, workflow_config)
+
+    logger.info("Starting workflow %s (workflow_id=%s)", workflow_key, workflow_id)
 
     # Initialize Core DB (runs migrations) for CLI usage
     from app.Api.db.sqlite_db import init_db
@@ -251,7 +260,11 @@ def main() -> int:
     exec_ctx_data.add_ctx_data("ingest_storage_root", str(ingest_storage_root))
 
     facade = IngestWfFacade()
-    return_code = facade.execute(req_dto, resp_dto, exec_ctx_data)
+    try:
+        return_code = facade.execute(req_dto, resp_dto, exec_ctx_data)
+    except Exception:
+        logger.exception("Workflow %s failed with unhandled exception", workflow_key)
+        return_code = 1
 
     # Mark completion in the DB-backed status service
     from app.Core.services.workflow_status_service import WorkflowStatusService
@@ -263,6 +276,8 @@ def main() -> int:
         workflow_selector=workflow_key,
         display_name=workflow_child,
     )
+
+    logger.info("Workflow %s finished with return_code=%d", workflow_key, return_code)
 
     extracted_html_chunks = resp_dto.get_ctx_data_by_key("extracted_html_chunks") or {}
     chunk_results_by_method = resp_dto.get_ctx_data_by_key("chunk_results_by_method") or {}

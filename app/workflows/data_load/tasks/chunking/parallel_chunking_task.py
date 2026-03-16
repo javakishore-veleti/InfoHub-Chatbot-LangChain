@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -18,14 +19,11 @@ from app.workflows.data_load.tasks.chunking.sliding_window_overlap_task import S
 from app.workflows.data_load.tasks.storage_manager import IngestStorageManager
 
 
-class ChunkHtmlTextTask(WfTask):
-    """Coordinator task that runs selected chunking strategy tasks in parallel.
+logger = logging.getLogger(__name__)
 
-    Example meaning with the sample Bedrock onboarding text:
-    the same content containing the intro, Step 1, Step 2, and Step 3 is passed
-    to every strategy once crawl text is ready. Each strategy then produces a
-    different chunk view of that same content.
-    """
+
+class ChunkHtmlTextTask(WfTask):
+    """Coordinator task that runs selected chunking strategy tasks in parallel."""
 
     def __init__(self):
         super().__init__()
@@ -68,33 +66,27 @@ class ChunkHtmlTextTask(WfTask):
         return resolved_methods
 
     def execute(self, reqDto: IngestReqDto, respDto: IngestRespDto, execCtxData: ExecCtxData) -> int:
-        """Execute strategy tasks over crawled text, persist outputs, and publish aggregate keys.
-
-        Using the sample Bedrock text as an example:
-        - fixed token may split inside Step 2 if the token budget ends there
-        - paragraph strategy may keep each step block together
-        - query-aware may emphasize Step 2/Step 3 if the query is about API keys or SDKs
-        This method coordinates all of those runs on the same input text.
-        """
+        """Execute strategy tasks over crawled text, persist outputs, and publish aggregate keys."""
+        logger.info("ChunkHtmlTextTask starting")
         pages_text_by_url = respDto.get_ctx_data_by_key("crawled_page_text_by_url") or {}
         run_folder_str = respDto.get_ctx_data_by_key("active_run_folder")
         if not pages_text_by_url or not run_folder_str:
+            logger.warning("No crawled pages or run folder — cannot chunk")
             respDto.set_status("failed")
             return WfReturnCodes.FAILED
 
-        # Example AWSBedrock input here:
-        # {"https://docs.aws.amazon.com/.../what-is-bedrock.html": "<clean text>", ...}
         methods = self._resolve_methods(reqDto)
         if not methods:
+            logger.warning("No chunking methods resolved")
             respDto.set_status("failed")
             return WfReturnCodes.FAILED
+
+        logger.info("Running %d chunking strategies in parallel: %s", len(methods), methods)
 
         strategy_registry = self._strategy_registry()
         chunk_results_by_method: dict[str, dict[str, list[str]]] = {}
 
         try:
-            # Fan out the same crawled page text to all selected strategies in parallel.
-            # We do this only after crawl, so AWSBedrock pages are fetched once, not once per strategy.
             with ThreadPoolExecutor(max_workers=min(8, len(methods))) as executor:
                 futures = {
                     method: executor.submit(
@@ -107,15 +99,17 @@ class ChunkHtmlTextTask(WfTask):
                     for method in methods
                 }
                 for method, future in futures.items():
-                    # Each result is shaped like {url: [chunk1, chunk2, ...]} for one strategy.
                     chunk_results_by_method[method] = future.result()
+                    total_chunks = sum(len(c) for c in chunk_results_by_method[method].values())
+                    logger.info("Strategy '%s' produced %d chunks across %d pages",
+                                method, total_chunks, len(chunk_results_by_method[method]))
 
-            # Persist each strategy under the current run folder for this workflow_id.
-            # Example path: .../ingest/ingest_001/YYYY.../chunk_results/semantic/
             storage_root = execCtxData.get_ctx_data_by_key("ingest_storage_root")
             storage = IngestStorageManager(Path(storage_root))
             storage.write_chunk_results(Path(run_folder_str), chunk_results_by_method)
+            logger.info("Chunk results persisted to %s", run_folder_str)
         except Exception:
+            logger.exception("ChunkHtmlTextTask failed")
             respDto.set_status("failed")
             return WfReturnCodes.FAILED
 

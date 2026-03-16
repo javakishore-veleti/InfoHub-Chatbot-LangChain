@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 import hashlib
 import json
 from pathlib import Path
 from urllib.parse import urlparse
+
+logger = logging.getLogger(__name__)
 
 
 class IngestStorageManager:
@@ -53,9 +56,11 @@ class IngestStorageManager:
             payload = {"url": url, "text": text}
             file_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
             index_payload[url] = file_name
+            logger.debug("Wrote crawled page: %s → %s", url, file_path)
 
         index_path = pages_dir / "index.json"
         index_path.write_text(json.dumps(index_payload, ensure_ascii=True, indent=2), encoding="utf-8")
+        logger.info("Wrote %d crawled pages to %s", len(index_payload), pages_dir)
 
     def load_crawled_pages(self, run_folder: Path) -> dict[str, str]:
         pages_dir = run_folder / "crawled_pages"
@@ -96,9 +101,12 @@ class IngestStorageManager:
                     "chunks": chunks,
                 }
                 file_path.write_text(json.dumps(payload, ensure_ascii=True, indent=2), encoding="utf-8")
+                logger.debug("Wrote chunk file: %s (%d chunks)", file_path, len(chunks))
 
             summary_path = method_dir / "summary.json"
             summary_path.write_text(json.dumps(method_summary, ensure_ascii=True, indent=2), encoding="utf-8")
+            logger.info("Wrote %d chunk files for method '%s' (%d total chunks)",
+                        len(page_map), method, method_summary["chunks"])
 
     @staticmethod
     def _safe_name(url: str) -> str:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,35 +32,40 @@ class CrawlConfig:
     allowed_path_prefixes: list[str] | None = None
 
 
+logger = logging.getLogger(__name__)
+
+
 class BedrockDocsCrawler:
     def __init__(self, config: CrawlConfig):
         self.config = config
 
     def crawl_text_only(self) -> dict[str, str]:
         # BFS crawl starting from the configured seed page.
-        # Example AWSBedrock seed: what-is-bedrock.html, then linked user guide pages.
         results: dict[str, str] = {}
         visited: set[str] = set()
         queue: Deque[tuple[str, int]] = deque([(self._normalize_url(self.config.start_url), 0)])
+
+        logger.info("Starting BFS crawl from %s (max_pages=%d, max_depth=%d)",
+                     self.config.start_url, self.config.max_pages, self.config.max_depth)
 
         while queue and len(visited) < self.config.max_pages:
             current_url, depth = queue.popleft()
             if current_url in visited:
                 continue
 
-            # Mark URL as seen before fetching so repeated nav links do not create duplicate work.
             visited.add(current_url)
+            logger.debug("Crawling [depth=%d, visited=%d/%d]: %s",
+                         depth, len(visited), self.config.max_pages, current_url)
             html = self._fetch_html(current_url)
             if not html:
+                logger.debug("No HTML content for %s — skipping", current_url)
                 continue
 
-            # Convert raw HTML into human-readable text that later chunking strategies can consume.
             text = self._extract_text_from_html(html)
             if text:
                 results[current_url] = text
+                logger.debug("Extracted %d chars of text from %s", len(text), current_url)
 
-            # Stop following sublinks once the configured depth is reached.
-            # Example with max_depth=2: seed page -> child page -> grandchild page.
             if depth >= self.config.max_depth:
                 continue
 
@@ -67,10 +73,10 @@ class BedrockDocsCrawler:
                 if next_url not in visited:
                     queue.append((next_url, depth + 1))
 
+        logger.info("Crawl complete: %d pages fetched, %d pages with text", len(visited), len(results))
         return results
 
     def _fetch_html(self, url: str) -> str:
-        # Fetch only HTML pages; PDFs/images/other content types are ignored.
         request = Request(url=url, headers={"User-Agent": "InfoHubBot/1.0"})
         try:
             with urlopen(request, timeout=self.config.timeout_seconds) as response:
@@ -79,6 +85,7 @@ class BedrockDocsCrawler:
                     return ""
                 return response.read().decode("utf-8", errors="ignore")
         except Exception:
+            logger.debug("Failed to fetch %s", url, exc_info=True)
             return ""
 
     @staticmethod
@@ -129,9 +136,7 @@ class CrawlHtmlFilesTask(WfTask):
         self.task_name = "CRAWL_HTML_FILES_TASK"
 
     def execute(self, reqDto: IngestReqDto, respDto: IngestRespDto, execCtxData: ExecCtxData) -> int:
-        # Build crawl config from request DTO.
-        # Example child workflow AWSBedrock resolves to workflow_id ingest_001,
-        # but the actual crawl knobs still come from the selector's config values.
+        logger.info("CrawlHtmlFilesTask starting")
         config = CrawlConfig(
             start_url=reqDto.get_ctx_data_by_key("seed_url") or CrawlConfig.start_url,
             max_tokens=reqDto.get_ctx_data_by_key("max_tokens") or CrawlConfig.max_tokens,
@@ -153,8 +158,8 @@ class CrawlHtmlFilesTask(WfTask):
             return WfReturnCodes.FAILED
 
         storage = IngestStorageManager(Path(storage_root))
-        # fetch_again=True forces a brand-new crawl folder even if latest_data.json exists.
         fetch_again = bool(reqDto.get_ctx_data_by_key("fetch_again"))
+        logger.debug("Storage root: %s, fetch_again=%s", storage_root, fetch_again)
 
         try:
             page_text_by_url: dict[str, str]
@@ -166,7 +171,7 @@ class CrawlHtmlFilesTask(WfTask):
             if latest_run is not None and not fetch_again:
                 page_text_by_url = storage.load_crawled_pages(latest_run)
                 if page_text_by_url:
-                    # Example reuse: ingest_001/latest_data.json points to yesterday's successful AWSBedrock crawl.
+                    logger.info("Reusing existing run folder: %s (%d pages)", latest_run, len(page_text_by_url))
                     reused_latest = True
                     run_folder = latest_run
                 else:
@@ -182,13 +187,15 @@ class CrawlHtmlFilesTask(WfTask):
                 storage.write_crawled_pages(run_folder, page_text_by_url)
                 storage.write_latest_pointer(run_folder)
 
-            # Publish crawl outputs for downstream task(s), mainly ChunkHtmlTextTask.
             respDto.add_ctx_data("crawl_config", config.__dict__)
             respDto.add_ctx_data("crawled_page_text_by_url", page_text_by_url)
             respDto.add_ctx_data("active_run_folder", str(run_folder))
             respDto.add_ctx_data("reused_latest_run", reused_latest)
+            logger.info("CrawlHtmlFilesTask completed: %d pages, run_folder=%s, reused=%s",
+                         len(page_text_by_url), run_folder, reused_latest)
             return WfReturnCodes.SUCCESS
         except Exception:
+            logger.exception("CrawlHtmlFilesTask failed")
             respDto.set_status("failed")
             return WfReturnCodes.FAILED
 

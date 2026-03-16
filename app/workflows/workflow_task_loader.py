@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import logging
 from importlib import import_module
 import json
 from pathlib import Path
 
 from app.common.interfaces.wf_interfaces import WfTask
+
+logger = logging.getLogger(__name__)
 
 
 class WorkflowTaskLoader:
@@ -77,5 +80,6 @@ class WorkflowTaskLoader:
             raise ValueError(f"Workflow '{workflow_name}' must define a non-empty list of task paths")
 
         tasks = cls.instantiate_task_paths(task_paths)
+        logger.info("Loaded %d tasks for workflow '%s': %s", len(tasks), workflow_name, task_paths)
         return tasks, task_paths
 

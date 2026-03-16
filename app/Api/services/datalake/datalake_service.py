@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import math
 from typing import Any
 
@@ -15,6 +16,9 @@ from app.Api.schemas.datalake_schemas import (
 )
 from app.Api.services.datalake.cache_manager import DatalakeCacheManager
 from app.Api.services.datalake.reader_factory import StorageReaderFactory
+
+
+logger = logging.getLogger(__name__)
 
 
 class DatalakeService:

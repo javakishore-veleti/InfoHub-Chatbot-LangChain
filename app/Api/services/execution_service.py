@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from uuid import uuid4
@@ -14,6 +15,9 @@ from app.common.dtos.ingest_dtos import IngestReqDto, IngestRespDto
 from app.workflows.data_load.ingest_wf_facade import IngestWfFacade
 
 
+logger = logging.getLogger(__name__)
+
+
 class ExecutionService:
     """Background execution orchestration for workflow runs requested by the portal."""
 
@@ -24,6 +28,7 @@ class ExecutionService:
         self.status_service = WorkflowStatusService()
 
     def submit_ingest_run(self, workflow_selector: str, inputs: dict) -> ExecutionSummary:
+        logger.info("Submitting ingest run for workflow_selector=%s", workflow_selector)
         parent_name, child_name, selector, workflow_id, effective_config = build_effective_config(workflow_selector, inputs)
         display_name = effective_config.get("ui", {}).get("display_name") or effective_config.get("display_name") or child_name
         now = datetime.now().isoformat(timespec="seconds")
@@ -50,6 +55,7 @@ class ExecutionService:
             "updated_at": now,
         }
         self.repository.create_execution(record)
+        logger.info("Execution %s created for workflow_id=%s — submitting to thread pool", execution_id, workflow_id)
         self._executor.submit(self._run_execution, execution_id, record)
         return ExecutionSummary.model_validate(self.repository.get_execution(execution_id))
 
@@ -87,6 +93,8 @@ class ExecutionService:
         return ExecutionDetail.model_validate(record) if record else None
 
     def _run_execution(self, execution_id: str, record: dict) -> None:
+        logger.info("Background execution started: execution_id=%s, workflow=%s",
+                     execution_id, record["workflow_selector"])
         req_dto = IngestReqDto()
         for key, value in record["effective_config"].items():
             if key == "workflow_id":
@@ -118,6 +126,7 @@ class ExecutionService:
         try:
             return_code = IngestWfFacade().execute(req_dto, resp_dto, exec_ctx_data)
             status = {0: "COMPLETED", 1: "FAILED", 2: "SKIPPED"}.get(return_code, "FAILED")
+            logger.info("Execution %s finished: status=%s, return_code=%d", execution_id, status, return_code)
             response_summary = {
                 "workflow": record["workflow_selector"],
                 "workflow_id": record["workflow_id"],
@@ -155,6 +164,7 @@ class ExecutionService:
             DatalakeCacheManager().invalidate_workflow(record["workflow_id"])
 
         except Exception as exc:
+            logger.exception("Execution %s failed with exception", execution_id)
             self.repository.update_execution(
                 execution_id,
                 status="FAILED",

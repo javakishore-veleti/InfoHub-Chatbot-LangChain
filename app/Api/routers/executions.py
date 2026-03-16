@@ -1,7 +1,11 @@
+import logging
+
 from fastapi import APIRouter, HTTPException, Query
 
 from app.Api.services.execution_service import ExecutionService
 from app.Core.services.workflow_status_service import WorkflowStatusService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/executions", tags=["executions"])
 service = ExecutionService()

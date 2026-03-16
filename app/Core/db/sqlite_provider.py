@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import logging
 import sqlite3
 from pathlib import Path
 from typing import Any
 
 from app.Core.interfaces.db_interface import IDbProvider
 from app.Core.utils.singleton import SingletonABCMeta
+
+logger = logging.getLogger(__name__)
 
 
 class SqliteProvider(IDbProvider, metaclass=SingletonABCMeta):
@@ -17,6 +20,7 @@ class SqliteProvider(IDbProvider, metaclass=SingletonABCMeta):
 
     def init(self) -> None:
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
+        logger.info("SQLite provider initialized: %s", self._db_path)
 
     def get_connection(self) -> sqlite3.Connection:
         conn = sqlite3.connect(str(self._db_path), check_same_thread=False)

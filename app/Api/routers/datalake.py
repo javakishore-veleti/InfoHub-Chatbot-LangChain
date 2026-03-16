@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, HTTPException, Query
 
 from app.Api.schemas.datalake_schemas import (
@@ -8,6 +10,8 @@ from app.Api.schemas.datalake_schemas import (
     RunFolderInfo,
 )
 from app.Api.services.datalake.datalake_service import DatalakeService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/datalake", tags=["datalake"])
 

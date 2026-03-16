@@ -14,12 +14,16 @@ npm run devops:docker:status-all     # Check container status
 ```bash
 npm run start:api-ui                 # bash
 npm run start:api-ui:ps              # PowerShell
+npm run stop:api-ui                  # bash  — stop API + UI
+npm run stop:api-ui:ps               # PowerShell — stop API + UI
 ```
 
 **With Docker backend (Postgres + Redis):**
 ```bash
 npm run start:api-ui:docker          # bash
 npm run start:api-ui:docker:ps       # PowerShell
+npm run stop:api-ui:docker           # bash  — stop API + UI + Docker services
+npm run stop:api-ui:docker:ps        # PowerShell — stop API + UI + Docker services
 ```
 
 ## Browser URLs
