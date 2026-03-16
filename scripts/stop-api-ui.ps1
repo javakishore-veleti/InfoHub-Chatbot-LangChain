@@ -10,16 +10,29 @@ function Free-Port {
         Write-Host "No process found on port $Port."
         return
     }
-    foreach ($conn in $connections) {
-        $pid = $conn.OwningProcess
+    $pids = $connections | Select-Object -ExpandProperty OwningProcess -Unique
+    foreach ($pid in $pids) {
         $proc = Get-Process -Id $pid -ErrorAction SilentlyContinue
         if ($proc) {
-            Write-Host "Port $Port is in use by PID $pid ($($proc.ProcessName)) - stopping it..."
-            Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
-            Start-Sleep -Seconds 1
-            Write-Host "Stopped process on port $Port."
+            Write-Host "Port $Port — killing PID $pid ($($proc.ProcessName)) with process tree..."
+            # /T kills the entire process tree
+            & taskkill /PID $pid /T /F 2>$null
         }
     }
+
+    # Wait for port to be released.
+    $retries = 5
+    while ($retries -gt 0) {
+        Start-Sleep -Seconds 1
+        $remaining = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
+        if (-not $remaining) { break }
+        Write-Host "Port $Port still in use — retrying ($retries)..."
+        $remaining | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object {
+            & taskkill /PID $_ /T /F 2>$null
+        }
+        $retries--
+    }
+    Write-Host "Stopped all processes on port $Port."
 }
 
 Write-Host "Stopping API + UI..."

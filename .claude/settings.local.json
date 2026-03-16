@@ -34,7 +34,16 @@
       "Bash(netstat -ano 2>/dev/null | tr -d '\\\\r' | grep \":8000 \" | grep \"LISTENING\" | head -3)",
       "Bash(netstat -ano 2>/dev/null | tr -d '\\\\r' | grep \":4200 \" | grep \"LISTENING\" | head -3)",
       "Bash(netstat -ano)",
-      "Bash(taskkill //PID 11480 //F)"
+      "Bash(taskkill //PID 11480 //F)",
+      "Bash(find /c/Users/javak/PycharmProjects/InfoHub-Chatbot-LangChain/app -name \"*db*\" -o -name \"*provider*\" -o -name \"*repository*\" | grep -E \"\\\\.py$\")",
+      "Bash(bash ./scripts/stop-api-ui.sh 2>&1)",
+      "Bash(taskkill //PID 25980 //T //F 2>&1)",
+      "Bash(tasklist //FI \"PID eq 25980\" 2>/dev/null | tr -d '\\\\r')",
+      "Bash(export DB_TYPE=postgres && echo \"Shell DB_TYPE=$DB_TYPE\" && uv run --active python -c \"import os; print\\(f'Python DB_TYPE={os.environ.get\\(\\\\\"DB_TYPE\\\\\", \\\\\"NOT SET\\\\\"\\)}'\\)\")",
+      "Bash(bash -c 'export DB_TYPE=postgres; echo \"docker script DB_TYPE=$DB_TYPE\"; bash -c \"echo \\\\\"api-ui script DB_TYPE=\\\\$DB_TYPE\\\\\"; bash -c \\\\\"echo \\\\\\\\\\\\\"api script DB_TYPE=\\\\\\\\\\\\$DB_TYPE\\\\\\\\\\\\\"\\\\\"\"')",
+      "Bash(export DB_TYPE=postgres && bash -c 'echo \"child DB_TYPE=$DB_TYPE\"')",
+      "Bash(uv run:*)",
+      "Bash(DB_TYPE=postgres uv run --active python -c \"\nimport os\nprint\\(f'DB_TYPE={os.environ.get\\(\\\\\"DB_TYPE\\\\\"\\)}'\\)\nfrom app.Api.db.sqlite_db import init_db\ninit_db\\(\\)\n\" 2>&1)"
     ]
   }
 }

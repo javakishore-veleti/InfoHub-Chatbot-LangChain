@@ -39,5 +39,5 @@ else
   exit 127
 fi
 
-echo "Starting FastAPI backend on http://0.0.0.0:$API_PORT"
+echo "Starting FastAPI backend on http://0.0.0.0:$API_PORT (DB_TYPE=${DB_TYPE:-sqlite})"
 "$UV_BIN" run --active python -m uvicorn app.Api.api_app:app --host 0.0.0.0 --port "$API_PORT" --reload
